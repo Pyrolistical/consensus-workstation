@@ -3,7 +3,6 @@
   "private": true,
   "description": "",
   "keywords": [],
-  "main": "src/index.js",
   "dependencies": {
     "@emotion/core": "10.0.34",
     "@emotion/styled": "10.0.27",
