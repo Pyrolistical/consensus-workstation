@@ -1,5 +1,5 @@
-// import React, { StrictMode, useState, Fragment, useEffect } from "react";
-// import ReactDOM from "react-dom";
+import React, { StrictMode, useState, Fragment, useEffect } from 'react';
+import ReactDOM from 'react-dom';
 // import { css } from "emotion";
 // import styled from "@emotion/styled";
 // import * as R from "ramda";
@@ -93,3 +93,5 @@
 // //   </StrictMode>,
 // //   document.getElementById("root")
 // // );
+
+ReactDOM.render(<h1>hi</h1>, document.getElementById('root'));
