@@ -1,6 +1,6 @@
 import React, { StrictMode, useState, Fragment, useEffect } from 'react';
 import ReactDOM from 'react-dom';
-import { css } from 'emotion';
+import { css } from '@emotion/css';
 import styled from '@emotion/styled';
 import * as R from 'ramda';
 
