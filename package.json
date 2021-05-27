@@ -2,6 +2,7 @@
   "name": "consensus-workstation",
   "private": true,
   "dependencies": {
+    "@emotion/react": "11.4.0",
     "@emotion/styled": "11.3.0",
     "emotion": "11.0.0",
     "ramda": "0.27.1",
@@ -19,6 +20,7 @@
     "webpack-dev-server": "3.11.2"
   },
   "scripts": {
-    "start": "webpack serve --mode development"
+    "start": "webpack serve --mode development",
+    "build": "webpack build --mode development"
   }
 }
