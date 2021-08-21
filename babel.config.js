@@ -7,7 +7,8 @@ module.exports = {
     [
       '@babel/plugin-proposal-record-and-tuple',
       {
-        importPolyfill: true
+        importPolyfill: true,
+        syntaxType: 'hash'
       }
     ]
   ]
