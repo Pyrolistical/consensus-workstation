@@ -13,14 +13,21 @@
     "@babel/core": "7.14.3",
     "@babel/preset-env": "7.14.2",
     "@babel/preset-react": "7.13.13",
+    "@babel/preset-typescript": "7.15.0",
+    "babel-jest": "27.0.6",
     "babel-loader": "8.2.2",
     "html-webpack-plugin": "5.3.1",
+    "jest": "27.0.6",
     "webpack": "5.37.1",
     "webpack-cli": "4.7.0",
     "webpack-dev-server": "3.11.2"
   },
   "scripts": {
     "start": "webpack serve --mode development",
+    "test": "jest",
     "build": "webpack build --mode development"
+  },
+  "jest": {
+    "testEnvironment": "./test-env.js"
   }
 }
