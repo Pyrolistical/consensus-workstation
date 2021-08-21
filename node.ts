@@ -1,5 +1,4 @@
-import * as R from "ramda";
-import produce from "immer";
+import * as R from 'ramda';
 
 import {
   Request,
@@ -12,7 +11,7 @@ import {
   NodeVolatileState,
   NodeVolatileLeaderState,
   NodeId
-} from "./events";
+} from './events';
 
 export default (selfNodeId: NodeId): Node => {
   let networkCallState: NetworkCallState = {
@@ -42,12 +41,12 @@ export default (selfNodeId: NodeId): Node => {
       const results = [];
 
       function saveRequest(request: Partial<Request>): Request {
-        networkCallState = produce(networkCallState, (draft) => {
-          request.requestId = draft.nextRequestId++;
-          draft.inflightRequests[request.requestId] = request as Request;
-        });
+        request.requestId = networkCallState.nextRequestId++;
+        networkCallState.inflightRequests[
+          request.requestId
+        ] = request as Request;
         results.push({
-          type: "SaveNetworkCallState",
+          type: 'SaveNetworkCallState',
           source: selfNodeId,
           state: networkCallState
         });
@@ -56,11 +55,9 @@ export default (selfNodeId: NodeId): Node => {
 
       function loadRequest(requestId: number): Request {
         const request: Request = networkCallState.inflightRequests[requestId];
-        networkCallState = produce(networkCallState, (draft) => {
-          delete draft.inflightRequests[requestId];
-        });
+        delete networkCallState.inflightRequests[requestId];
         results.push({
-          type: "SaveNetworkCallState",
+          type: 'SaveNetworkCallState',
           source: selfNodeId,
           state: networkCallState
         });
@@ -77,7 +74,7 @@ export default (selfNodeId: NodeId): Node => {
           const entries = state.log.slice(prevLogIndex + 1);
           results.push(
             saveRequest({
-              type: "AppendEntriesRequest",
+              type: 'AppendEntriesRequest',
               destination: destination,
               term: state.currentTerm,
               leaderId: selfNodeId,
@@ -90,34 +87,32 @@ export default (selfNodeId: NodeId): Node => {
         }
       }
       switch (event.type) {
-        case "ClientRequest":
-          const entries = event.commands.map((command) => {
+        case 'ClientRequest':
+          const entries = event.commands.map(command => {
             return {
               term: state.currentTerm,
               command
             };
           });
-          state = produce(state, (draft) => {
-            draft.log.push(...entries);
-          });
+          state.log.push(...entries);
           results.push({
-            type: "SaveNodeState",
+            type: 'SaveNodeState',
             source: selfNodeId,
             state
           });
 
           R.pipe(
             R.reject(R.equals(selfNodeId)),
-            R.forEach((nodeId) => {
+            R.forEach(nodeId => {
               appendEntries(nodeId);
             })
           )(configuration.peers);
           break;
-        case "AppendEntriesRequest": {
+        case 'AppendEntriesRequest': {
           if (event.term < state.currentTerm) {
             results.push({
               requestId: event.requestId,
-              type: "AppendEntriesResponse",
+              type: 'AppendEntriesResponse',
               destination: event.source,
               term: state.currentTerm,
               success: false
@@ -125,87 +120,79 @@ export default (selfNodeId: NodeId): Node => {
             break;
           }
           const conflict =
-            R.path([event.prevLogIndex, "term"], state.log) !==
+            R.path([event.prevLogIndex, 'term'], state.log) !==
             event.prevLogTerm;
-          state = produce(state, (draft) => {
-            draft.log.slice(event.prevLogIndex);
-          });
+          state.log.slice(event.prevLogIndex);
           if (conflict) {
             results.push({
-              type: "SaveNodeState",
+              type: 'SaveNodeState',
               source: selfNodeId,
               state
             });
             results.push({
               requestId: event.requestId,
-              type: "AppendEntriesResponse",
+              type: 'AppendEntriesResponse',
               destination: event.source,
               term: state.currentTerm,
               success: false
             });
             break;
           }
-          state = produce(state, (draft) => {
-            draft.log.push(...event.entries);
-          });
+          state.log.push(...event.entries);
           if (event.leaderCommit > volatileState.commitIndex) {
-            volatileState = produce(volatileState, (draft) => {
-              draft.commitIndex = Math.min(
-                event.leaderCommit,
-                state.log.length - 1
-              );
-            });
+            volatileState.commitIndex = Math.min(
+              event.leaderCommit,
+              state.log.length - 1
+            );
             results.push({
-              type: "SaveNodeVolatileState",
+              type: 'SaveNodeVolatileState',
               source: selfNodeId,
               volatileState
             });
           }
           results.push({
-            type: "SaveNodeState",
+            type: 'SaveNodeState',
             source: selfNodeId,
             state
           });
           results.push({
             requestId: event.requestId,
-            type: "AppendEntriesResponse",
+            type: 'AppendEntriesResponse',
             destination: event.source,
             term: state.currentTerm,
             success: true
           });
           break;
         }
-        case "NetworkCallStateRestored":
+        case 'NetworkCallStateRestored':
           networkCallState = event.state;
           break;
-        case "ConfigurationRestored":
+        case 'ConfigurationRestored':
           configuration = event.configuration;
           break;
-        case "NodeStateRestored":
+        case 'NodeStateRestored':
           state = event.state;
           break;
-        case "NodeVolatileStateRestored":
+        case 'NodeVolatileStateRestored':
           volatileState = event.state;
           break;
-        case "NodeVolatileLeaderStateRestored":
+        case 'NodeVolatileLeaderStateRestored':
           volatileLeaderState = event.state;
           break;
-        case "ElectionTimerEnded":
-          state = produce(state, (draft) => {
-            draft.currentTerm += 1;
-          });
+        case 'ElectionTimerEnded':
+          state.currentTerm += 1;
           results.push({
-            type: "SaveNodeState",
+            type: 'SaveNodeState',
             source: selfNodeId,
             state
           });
           R.pipe(
             R.reject(R.equals(selfNodeId)),
-            R.forEach((nodeId) => {
+            R.forEach(nodeId => {
               const { term: lastLogTerm } = R.last(state.log);
               results.push(
                 saveRequest({
-                  type: "RequestVotesRequest",
+                  type: 'RequestVotesRequest',
                   destination: nodeId,
                   term: state.currentTerm,
                   candidateId: selfNodeId,
@@ -216,45 +203,39 @@ export default (selfNodeId: NodeId): Node => {
             })
           )(configuration.peers);
           results.push({
-            type: "ElectionTimerStarted",
+            type: 'ElectionTimerStarted',
             source: selfNodeId
           });
           break;
-        case "AppendEntriesResponse": {
+        case 'AppendEntriesResponse': {
           const request = loadRequest(event.requestId) as AppendEntriesRequest;
           if (!request) {
             break;
           }
           if (event.success) {
-            volatileLeaderState = produce(volatileLeaderState, (draft) => {
-              draft.nextIndex[event.source] =
-                request.prevLogIndex + request.entries.length;
-              draft.matchIndex[event.source] =
-                request.prevLogIndex + request.entries.length - 1;
-            });
+            volatileLeaderState.nextIndex[event.source] =
+              request.prevLogIndex + request.entries.length;
+            volatileLeaderState.matchIndex[event.source] =
+              request.prevLogIndex + request.entries.length - 1;
             results.push({
-              type: "SaveNodeVolatileLeaderState",
-              source: "leader",
+              type: 'SaveNodeVolatileLeaderState',
+              source: 'leader',
               state: volatileLeaderState
             });
           } else {
             if (event.term > state.currentTerm) {
-              state = produce(state, (draft) => {
-                draft.currentTerm = event.term;
-              });
+              state.currentTerm = event.term;
               results.push({
-                type: "SaveNodeState",
+                type: 'SaveNodeState',
                 source: selfNodeId,
                 state
               });
               break;
             }
-            volatileLeaderState = produce(volatileLeaderState, (draft) => {
-              draft.nextIndex[event.source] -= 1;
-            });
+            volatileLeaderState.nextIndex[event.source] -= 1;
             results.push({
-              type: "SaveNodeVolatileLeaderState",
-              source: "leader",
+              type: 'SaveNodeVolatileLeaderState',
+              source: 'leader',
               state: volatileLeaderState
             });
           }

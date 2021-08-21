@@ -1,4 +1,5 @@
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const BabelConfig = require('./babel.config.js');
 
 module.exports = {
   entry: './index.js',
@@ -10,22 +11,13 @@ module.exports = {
   module: {
     rules: [
       {
-        test: /\.(js)$/,
+        test: /\.((j|t)s)$/,
         exclude: /node_modules/,
         use: {
           loader: 'babel-loader',
           options: {
-            presets: [
-              [
-                '@babel/preset-env',
-                {
-                  targets: {
-                    node: 'current'
-                  }
-                }
-              ],
-              ['@babel/preset-react']
-            ]
+            presets: [...BabelConfig.presets, '@babel/preset-react'],
+            plugins: BabelConfig.plugins
           }
         }
       }
