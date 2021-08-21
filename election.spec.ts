@@ -1,79 +1,79 @@
-import { Event } from "./events";
+import { Event } from './events';
 
-import Node from "./node";
-import Network from "./network";
+import Node from './node';
+import Network from './network';
 
-test("election started after leader fails", () => {
-  const peers = ["leader", "next candidate", "follower"];
+test('election started after leader fails', () => {
+  const peers = ['leader', 'next candidate', 'follower'];
   const nodes = peers.map(Node);
   const network = Network(nodes);
   const events: Event[] = [
     {
-      type: "ConfigurationRestored",
-      destination: "leader",
+      type: 'ConfigurationRestored',
+      destination: 'leader',
       configuration: {
         peers
       }
     },
     {
-      type: "NodeStateRestored",
-      destination: "leader",
+      type: 'NodeStateRestored',
+      destination: 'leader',
       state: {
         currentTerm: 1,
-        votedFor: "leader",
+        votedFor: 'leader',
         log: [
           {
             term: 1,
-            command: ""
+            command: ''
           }
         ]
       }
     },
     {
-      type: "ConfigurationRestored",
-      destination: "next candidate",
+      type: 'ConfigurationRestored',
+      destination: 'next candidate',
       configuration: {
         peers
       }
     },
     {
-      type: "NodeStateRestored",
-      destination: "next candidate",
+      type: 'NodeStateRestored',
+      destination: 'next candidate',
       state: {
         currentTerm: 1,
-        votedFor: "leader",
+        votedFor: 'leader',
         log: [
           {
             term: 1,
-            command: ""
+            command: ''
           }
         ]
       }
     },
     {
-      type: "ConfigurationRestored",
-      destination: "follower",
+      type: 'ConfigurationRestored',
+      destination: 'follower',
       configuration: {
         peers
       }
     },
     {
-      type: "NodeStateRestored",
-      destination: "follower",
+      type: 'NodeStateRestored',
+      destination: 'follower',
       state: {
         currentTerm: 1,
-        votedFor: "leader",
+        votedFor: 'leader',
         log: [
           {
             term: 1,
-            command: ""
+            command: ''
           }
         ]
       }
     },
     {
-      type: "ElectionTimerEnded",
-      destination: "next candidate"
+      type: 'ElectionTimerEnded',
+      destination: 'next candidate'
     }
   ];
 
@@ -81,85 +81,56 @@ test("election started after leader fails", () => {
 
   expect(results).toEqual([
     {
-      type: "SaveNodeState",
-      source: "next candidate",
+      type: 'SaveNodeState',
+      source: 'next candidate',
       state: {
         currentTerm: 2,
-        votedFor: "leader",
+        votedFor: 'leader',
         log: [
           {
             term: 1,
-            command: ""
+            command: ''
           }
         ]
       }
     },
     {
-      type: "SaveNetworkCallState",
-      source: "next candidate",
-      state: {
-        nextRequestId: 1,
-        inflightRequests: {
-          "0": {
-            requestId: 0,
-            type: "RequestVotesRequest",
-            destination: "leader",
-            term: 2,
-            candidateId: "next candidate",
-            lastLogIndex: 0,
-            lastLogTerm: 1
-          }
-        }
-      }
+      type: 'RequestVotesRequest',
+      destination: 'leader',
+      term: 2,
+      candidateId: 'next candidate',
+      lastLogIndex: 0,
+      lastLogTerm: 1
     },
     {
       requestId: 0,
-      type: "RequestVotesRequest",
-      destination: "leader",
+      type: 'RequestVotesRequest',
+      destination: 'leader',
       term: 2,
-      candidateId: "next candidate",
+      candidateId: 'next candidate',
       lastLogIndex: 0,
       lastLogTerm: 1
     },
     {
-      type: "SaveNetworkCallState",
-      source: "next candidate",
-      state: {
-        nextRequestId: 2,
-        inflightRequests: {
-          "0": {
-            requestId: 0,
-            type: "RequestVotesRequest",
-            destination: "leader",
-            term: 2,
-            candidateId: "next candidate",
-            lastLogIndex: 0,
-            lastLogTerm: 1
-          },
-          "1": {
-            requestId: 1,
-            type: "RequestVotesRequest",
-            destination: "follower",
-            term: 2,
-            candidateId: "next candidate",
-            lastLogIndex: 0,
-            lastLogTerm: 1
-          }
-        }
-      }
+      type: 'RequestVotesRequest',
+      destination: 'follower',
+      term: 2,
+      candidateId: 'next candidate',
+      lastLogIndex: 0,
+      lastLogTerm: 1
     },
     {
       requestId: 1,
-      type: "RequestVotesRequest",
-      destination: "follower",
+      type: 'RequestVotesRequest',
+      destination: 'follower',
       term: 2,
-      candidateId: "next candidate",
+      candidateId: 'next candidate',
       lastLogIndex: 0,
       lastLogTerm: 1
     },
     {
-      type: "ElectionTimerStarted",
-      source: "next candidate"
+      type: 'ElectionTimerStarted',
+      source: 'next candidate'
     }
   ]);
 });

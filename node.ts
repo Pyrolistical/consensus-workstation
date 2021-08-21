@@ -3,7 +3,6 @@ import * as R from 'ramda';
 import {
   Request,
   AppendEntriesRequest,
-  NetworkCallState,
   Configuration,
   Event,
   Node,
@@ -14,11 +13,6 @@ import {
 } from './events';
 
 export default (selfNodeId: NodeId): Node => {
-  let networkCallState: NetworkCallState = {
-    nextRequestId: 0,
-    inflightRequests: {}
-  };
-
   let configuration: Configuration = {
     peers: []
   };
@@ -40,30 +34,6 @@ export default (selfNodeId: NodeId): Node => {
     handle(event: Event): Event[] {
       const results = [];
 
-      function saveRequest(request: Partial<Request>): Request {
-        request.requestId = networkCallState.nextRequestId++;
-        networkCallState.inflightRequests[
-          request.requestId
-        ] = request as Request;
-        results.push({
-          type: 'SaveNetworkCallState',
-          source: selfNodeId,
-          state: networkCallState
-        });
-        return request as Request;
-      }
-
-      function loadRequest(requestId: number): Request {
-        const request: Request = networkCallState.inflightRequests[requestId];
-        delete networkCallState.inflightRequests[requestId];
-        results.push({
-          type: 'SaveNetworkCallState',
-          source: selfNodeId,
-          state: networkCallState
-        });
-        return request;
-      }
-
       function appendEntries(destination) {
         if (
           state.log.length - 1 >=
@@ -72,18 +42,16 @@ export default (selfNodeId: NodeId): Node => {
           const prevLogIndex = volatileLeaderState.nextIndex[destination] - 1;
           const { term: prevLogTerm } = state.log[prevLogIndex];
           const entries = state.log.slice(prevLogIndex + 1);
-          results.push(
-            saveRequest({
-              type: 'AppendEntriesRequest',
-              destination: destination,
-              term: state.currentTerm,
-              leaderId: selfNodeId,
-              prevLogIndex,
-              prevLogTerm,
-              entries,
-              leaderCommit: volatileState.commitIndex
-            })
-          );
+          results.push({
+            type: 'AppendEntriesRequest',
+            destination: destination,
+            term: state.currentTerm,
+            leaderId: selfNodeId,
+            prevLogIndex,
+            prevLogTerm,
+            entries,
+            leaderCommit: volatileState.commitIndex
+          });
         }
       }
       switch (event.type) {
@@ -164,9 +132,6 @@ export default (selfNodeId: NodeId): Node => {
           });
           break;
         }
-        case 'NetworkCallStateRestored':
-          networkCallState = event.state;
-          break;
         case 'ConfigurationRestored':
           configuration = event.configuration;
           break;
@@ -190,16 +155,14 @@ export default (selfNodeId: NodeId): Node => {
             R.reject(R.equals(selfNodeId)),
             R.forEach(nodeId => {
               const { term: lastLogTerm } = R.last(state.log);
-              results.push(
-                saveRequest({
-                  type: 'RequestVotesRequest',
-                  destination: nodeId,
-                  term: state.currentTerm,
-                  candidateId: selfNodeId,
-                  lastLogIndex: state.log.length - 1,
-                  lastLogTerm
-                })
-              );
+              results.push({
+                type: 'RequestVotesRequest',
+                destination: nodeId,
+                term: state.currentTerm,
+                candidateId: selfNodeId,
+                lastLogIndex: state.log.length - 1,
+                lastLogTerm
+              });
             })
           )(configuration.peers);
           results.push({
@@ -208,38 +171,38 @@ export default (selfNodeId: NodeId): Node => {
           });
           break;
         case 'AppendEntriesResponse': {
-          const request = loadRequest(event.requestId) as AppendEntriesRequest;
-          if (!request) {
-            break;
-          }
-          if (event.success) {
-            volatileLeaderState.nextIndex[event.source] =
-              request.prevLogIndex + request.entries.length;
-            volatileLeaderState.matchIndex[event.source] =
-              request.prevLogIndex + request.entries.length - 1;
-            results.push({
-              type: 'SaveNodeVolatileLeaderState',
-              source: 'leader',
-              state: volatileLeaderState
-            });
-          } else {
-            if (event.term > state.currentTerm) {
-              state.currentTerm = event.term;
-              results.push({
-                type: 'SaveNodeState',
-                source: selfNodeId,
-                state
-              });
-              break;
-            }
-            volatileLeaderState.nextIndex[event.source] -= 1;
-            results.push({
-              type: 'SaveNodeVolatileLeaderState',
-              source: 'leader',
-              state: volatileLeaderState
-            });
-          }
-          appendEntries(event.source);
+          // const request = loadRequest(event.requestId) as AppendEntriesRequest;
+          // if (!request) {
+          //   break;
+          // }
+          // if (event.success) {
+          //   volatileLeaderState.nextIndex[event.source] =
+          //     request.prevLogIndex + request.entries.length;
+          //   volatileLeaderState.matchIndex[event.source] =
+          //     request.prevLogIndex + request.entries.length - 1;
+          //   results.push({
+          //     type: 'SaveNodeVolatileLeaderState',
+          //     source: 'leader',
+          //     state: volatileLeaderState
+          //   });
+          // } else {
+          //   if (event.term > state.currentTerm) {
+          //     state.currentTerm = event.term;
+          //     results.push({
+          //       type: 'SaveNodeState',
+          //       source: selfNodeId,
+          //       state
+          //     });
+          //     break;
+          //   }
+          //   volatileLeaderState.nextIndex[event.source] -= 1;
+          //   results.push({
+          //     type: 'SaveNodeVolatileLeaderState',
+          //     source: 'leader',
+          //     state: volatileLeaderState
+          //   });
+          // }
+          // appendEntries(event.source);
 
           break;
         }
