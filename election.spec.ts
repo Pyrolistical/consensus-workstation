@@ -103,24 +103,6 @@ test('election started after leader fails', () => {
       lastLogTerm: 1
     },
     {
-      requestId: 0,
-      type: 'RequestVotesRequest',
-      destination: 'leader',
-      term: 2,
-      candidateId: 'next candidate',
-      lastLogIndex: 0,
-      lastLogTerm: 1
-    },
-    {
-      type: 'RequestVotesRequest',
-      destination: 'follower',
-      term: 2,
-      candidateId: 'next candidate',
-      lastLogIndex: 0,
-      lastLogTerm: 1
-    },
-    {
-      requestId: 1,
       type: 'RequestVotesRequest',
       destination: 'follower',
       term: 2,
