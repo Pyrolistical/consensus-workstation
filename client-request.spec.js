@@ -3,7 +3,7 @@
 // import Node from "./node";
 // import Network from "./network";
 
-// test("client request are distributed from leader to peers", () => {
+xtest("client request are distributed from leader to peers", () => {
 //   const peers = ["leader", "follower", "another follower"];
 //   const nodes = peers.map(Node);
 //   const network = Network(nodes);
@@ -222,4 +222,4 @@
 //       leaderCommit: 0
 //     }
 //   ]);
-// });
+});
