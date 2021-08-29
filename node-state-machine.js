@@ -3,22 +3,21 @@ import * as R from 'ramda';
 export function next (node, event) {
   // function appendEntries(destination) {
   //   if (
-  //     state.log.length - 1 >=
-  //     volatileLeaderState.nextIndex[destination]
+  //     node.state.log.length - 1 >=
+  //     node.volatileLeaderState.nextIndex[destination]
   //   ) {
-  //     const prevLogIndex = volatileLeaderState.nextIndex[destination] - 1;
-  //     const { term: prevLogTerm } = state.log[prevLogIndex];
-  //     const entries = state.log.slice(prevLogIndex + 1);
-  //     results.push({
+  //     const prevLogIndex = node.volatileLeaderState.nextIndex[destination] - 1;
+  //     const { term: prevLogTerm } = node.state.log[prevLogIndex];
+  //     return #{
   //       type: 'AppendEntriesRequest',
-  //       destination: destination,
-  //       term: state.currentTerm,
-  //       leaderId: selfNodeId,
+  //       destination,
+  //       term: node.state.currentTerm,
+  //       leaderId: node.id,
   //       prevLogIndex,
   //       prevLogTerm,
-  //       entries,
-  //       leaderCommit: volatileState.commitIndex
-  //     });
+  //       entries: R.drop(prevLogIndex + 1, node.state.log),
+  //       leaderCommit: node.volatileState.commitIndex
+  //     };
   //   }
   // }
   switch (event.type) {
@@ -43,74 +42,79 @@ export function next (node, event) {
     //     })
     //   )(configuration.peers);
     //   break;
-    // case 'AppendEntriesRequest': {
-    //   if (event.term < state.currentTerm) {
-    //     results.push({
-    //       requestId: event.requestId,
-    //       type: 'AppendEntriesResponse',
-    //       destination: event.source,
-    //       term: state.currentTerm,
-    //       success: false
-    //     });
-    //     break;
-    //   }
-    //   const conflict =
-    //     R.path([event.prevLogIndex, 'term'], state.log) !==
-    //     event.prevLogTerm;
-    //   state.log.slice(event.prevLogIndex);
-    //   if (conflict) {
-    //     results.push({
-    //       type: 'SaveNodeState',
-    //       source: selfNodeId,
-    //       state
-    //     });
-    //     results.push({
-    //       requestId: event.requestId,
-    //       type: 'AppendEntriesResponse',
-    //       destination: event.source,
-    //       term: state.currentTerm,
-    //       success: false
-    //     });
-    //     break;
-    //   }
-    //   state.log.push(...event.entries);
-    //   if (event.leaderCommit > volatileState.commitIndex) {
-    //     volatileState.commitIndex = Math.min(
-    //       event.leaderCommit,
-    //       state.log.length - 1
-    //     );
-    //     results.push({
-    //       type: 'SaveNodeVolatileState',
-    //       source: selfNodeId,
-    //       volatileState
-    //     });
-    //   }
-    //   results.push({
-    //     type: 'SaveNodeState',
-    //     source: selfNodeId,
-    //     state
-    //   });
-    //   results.push({
-    //     requestId: event.requestId,
-    //     type: 'AppendEntriesResponse',
-    //     destination: event.source,
-    //     term: state.currentTerm,
-    //     success: true
-    //   });
-    //   break;
-    // }
-    // case 'ConfigurationRestored':
-    //   configuration = event.configuration;
-    //   break;
-    // case 'NodeStateRestored':
-    //   state = event.state;
-    //   break;
-    // case 'NodeVolatileStateRestored':
-    //   volatileState = event.state;
-    //   break;
-    // case 'NodeVolatileLeaderStateRestored':
-    //   volatileLeaderState = event.state;
-    //   break;
+    case 'AppendEntriesRequest': {
+      if (event.term < node.state.currentTerm) {
+        return #[
+          #{
+            type: 'AppendEntriesResponse',
+            destination: event.source,
+            term: node.state.currentTerm,
+            success: false
+          }
+        ];
+      }
+
+      const conflict =
+        R.path([event.prevLogIndex, 'term'], node.state.log) !==
+        event.prevLogTerm;
+      if (conflict) {
+        return #[
+          #{
+            type: 'SaveNodeState',
+            source: selfNodeId,
+            state: #{
+              ...node.state,
+              log: #[
+                ...R.drop(event.prevLogIndex, node.state.log)
+              ]
+            }
+          },
+          #{
+            type: 'AppendEntriesResponse',
+            destination: event.source,
+            term: node.state.currentTerm,
+            success: false,
+            request: event
+          }
+        ];
+      }
+
+      return #[
+        ...(event.leaderCommit > node.volatileState.commitIndex
+            ? #[
+              #{
+                type: 'SaveNodeVolatileState',
+                source: node.id,
+                volatileState: #{
+                  ...node.volatileState,
+                  commitIndex: Math.min(
+                    event.leaderCommit,
+                    node.state.log.length - 1
+                  )
+                }
+              }
+            ]
+            : #[]),
+        #{
+          type: 'SaveNodeState',
+          source: node.id,
+          state: #{
+            ...node.state,
+            log: #[
+              ...node.state.log,
+              ...event.entries
+            ]
+          }
+        },
+        #{
+          type: 'AppendEntriesResponse',
+          destination: event.source,
+          term: node.state.currentTerm,
+          success: true,
+          request: event
+        }
+      ];
+    }
     case 'ElectionTimerEnded':
       return #[
         #{
@@ -140,42 +144,40 @@ export function next (node, event) {
           source: node.id
         }
       ];
-    // case 'AppendEntriesResponse': {
-      // const request = loadRequest(event.requestId) as AppendEntriesRequest;
-      // if (!request) {
-      //   break;
-      // }
-      // if (event.success) {
-      //   volatileLeaderState.nextIndex[event.source] =
-      //     request.prevLogIndex + request.entries.length;
-      //   volatileLeaderState.matchIndex[event.source] =
-      //     request.prevLogIndex + request.entries.length - 1;
-      //   results.push({
-      //     type: 'SaveNodeVolatileLeaderState',
-      //     source: 'leader',
-      //     state: volatileLeaderState
-      //   });
-      // } else {
-      //   if (event.term > state.currentTerm) {
-      //     state.currentTerm = event.term;
-      //     results.push({
-      //       type: 'SaveNodeState',
-      //       source: selfNodeId,
-      //       state
-      //     });
-      //     break;
-      //   }
-      //   volatileLeaderState.nextIndex[event.source] -= 1;
-      //   results.push({
-      //     type: 'SaveNodeVolatileLeaderState',
-      //     source: 'leader',
-      //     state: volatileLeaderState
-      //   });
-      // }
-      // appendEntries(event.source);
-
-    //   break;
-    // }
+    case 'AppendEntriesResponse': {
+      if (event.success) {
+        return #[
+          #{
+            type: 'SaveNodeVolatileLeaderState',
+            source: 'leader',
+            state: #{
+              nextIndex: #{
+                ...node.volatileLeaderState.nextIndex,
+                [event.source]: event.request.prevLogIndex + event.request.entries.length + 1
+              },
+              matchIndex: #{
+                ...node.volatileLeaderState.matchIndex,
+                [event.source]: event.request.prevLogIndex + event.request.entries.length
+              }
+            }
+          }
+        ];
+      } else {
+        return #[
+          #{
+            type: 'SaveNodeVolatileLeaderState',
+            source: 'leader',
+            state: #{
+              ...node.volatileLeaderState,
+              nextIndex: #{
+                ...node.volatileLeaderState.nextState,
+                [event.source]: nodevolatileLeaderState.nextIndex[event.source] - 1
+              }
+            }
+          }
+        ];
+      }
+    }
   }
   return #[
     ...results

@@ -5,7 +5,6 @@ test('election started after leader fails', () => {
   const configuration = #{
     peers
   };
-
   const nodes = #[
     #{
       id: 'leader',
