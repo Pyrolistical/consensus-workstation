@@ -61,6 +61,10 @@ test('followers response success if append entries request passes consistency ch
       }
     },
     #{
+      type: 'ElectionTimerReset',
+      source: 'follower'
+    },
+    #{
       type: 'AppendEntriesResponse',
       destination: 'leader',
       term: 1,
@@ -84,3 +88,76 @@ test('followers response success if append entries request passes consistency ch
     }
   ]);
 });
+
+test('followers update their commitIndex with the leaderCommit', () => {
+  const peers = #['leader', 'follower', 'another follower'];
+  const configuration = #{
+    peers
+  };
+  const node = #{
+    id: 'follower',
+    configuration,
+    state: #{
+      currentTerm: 1,
+      votedFor: 'leader',
+      log: #[
+        #{
+          term: 1,
+          command: ''
+        },
+        #{
+          term: 1,
+          command: 'do thing'
+        }
+      ]
+    },
+    volatileState: #{
+      commitIndex: 0,
+      lastApplied: 0
+    }
+  };
+
+  const events = next(node, #{
+    type: 'AppendEntriesRequest',
+    source: 'leader',
+    destination: 'follower',
+    term: 1,
+    leaderId: 'leader',
+    prevLogIndex: 1,
+    prevLogTerm: 1,
+    entries: #[],
+    leaderCommit: 1
+  });
+
+  expect(events).toEqual(#[
+    #{
+      type: 'SaveVolatileState',
+      source: 'follower',
+      volatileState: #{
+        commitIndex: 1,
+        lastApplied: 0
+      }
+    },
+    #{
+      type: 'ElectionTimerReset',
+      source: 'follower'
+    },
+    #{
+      type: 'AppendEntriesResponse',
+      destination: 'leader',
+      term: 1,
+      success: true,
+      request: #{
+        type: 'AppendEntriesRequest',
+        source: 'leader',
+        destination: 'follower',
+        term: 1,
+        leaderId: 'leader',
+        prevLogIndex: 1,
+        prevLogTerm: 1,
+        entries: #[],
+        leaderCommit: 1
+      }
+    }
+  ]);
+})

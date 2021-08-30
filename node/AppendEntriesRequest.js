@@ -26,6 +26,10 @@ export default (node, event) => {
         }
       },
       #{
+        type: 'ElectionTimerReset',
+        source: node.id
+      },
+      #{
         type: 'AppendEntriesResponse',
         destination: event.source,
         term: node.state.currentTerm,
@@ -37,30 +41,35 @@ export default (node, event) => {
 
   return #[
     ...(event.leaderCommit > node.volatileState.commitIndex
-        ? #[
-          #{
-            type: 'SaveNodeVolatileState',
-            source: node.id,
-            volatileState: #{
-              ...node.volatileState,
-              commitIndex: Math.min(
-                event.leaderCommit,
-                node.state.log.length - 1
-              )
-            }
+      ? #[
+        #{
+          type: 'SaveVolatileState',
+          source: node.id,
+          volatileState: #{
+            ...node.volatileState,
+            commitIndex: event.leaderCommit
           }
-        ]
-        : #[]),
+        }
+      ]
+      : #[]),
+    ...(event.entries.length > 0
+      ? #[
+        #{
+          type: 'SaveNodeState',
+          source: node.id,
+          state: #{
+            ...node.state,
+            log: #[
+              ...node.state.log,
+              ...event.entries
+            ]
+          }
+        }
+      ]
+      : #[]),
     #{
-      type: 'SaveNodeState',
-      source: node.id,
-      state: #{
-        ...node.state,
-        log: #[
-          ...node.state.log,
-          ...event.entries
-        ]
-      }
+      type: 'ElectionTimerReset',
+      source: node.id
     },
     #{
       type: 'AppendEntriesResponse',
