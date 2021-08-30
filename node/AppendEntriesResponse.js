@@ -18,6 +18,7 @@ export default (node, event) => {
       ...node.volatileLeaderState.matchIndex,
       [event.source]: event.request.prevLogIndex + event.request.entries.length
     };
+    const majorityMatchIndex = calculateMajorityMatchIndex(node.state.log.length - 1, updatedMatchIndex);
     return #[
       #{
         type: 'SaveVolatileLeaderState',
@@ -29,7 +30,19 @@ export default (node, event) => {
           },
           matchIndex: updatedMatchIndex
         }
-      }
+      },
+      ...(majorityMatchIndex > node.volatileState.commitIndex
+          ? #[
+            #{
+              type: 'SaveVolatileState',
+              source: node.id,
+              volatileState: #{
+                ...node.volatileState,
+                commitIndex: majorityMatchIndex
+              }
+            }
+          ]
+          : #[])
     ];
   } else {
     return #[

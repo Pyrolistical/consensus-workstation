@@ -1,22 +1,42 @@
 import next, {calculateMajorityMatchIndex} from './AppendEntriesResponse'
 
 test('leader updates nextIndex and matchIndex on successful AppendEntries', () => {
-  const peers = #['leader', 'follower', 'another follower', 'yet another follower'];
+  const peers = #['leader', 'follower', 'another follower', 'yet another follower', 'last follower'];
   const configuration = #{
     peers
   };
   const node = #{
     id: 'leader',
+    state: #{
+      currentTerm: 1,
+      votedFor: 'leader',
+      log: #[
+        #{
+          term: 1,
+          command: ''
+        },
+        #{
+          term: 1,
+          command: 'do thing'
+        }
+      ]
+    },
+    volatileState: #{
+      commitIndex: 0,
+      lastApplied: 0
+    },
     volatileLeaderState: #{
       nextIndex: #{
         follower: 1,
         'another follower': 1,
-        'yet another follower': 1
+        'yet another follower': 1,
+        'last follower': 1
       },
       matchIndex: #{
         follower: 0,
         'another follower': 0,
-        'yet another follower': 0
+        'yet another follower': 0,
+        'last follower': 0
       }
     }
   };
@@ -53,25 +73,41 @@ test('leader updates nextIndex and matchIndex on successful AppendEntries', () =
         nextIndex: #{
           follower: 2,
           'another follower': 1,
-          'yet another follower': 1
+          'yet another follower': 1,
+          'last follower': 1
         },
         matchIndex: #{
           follower: 1,
           'another follower': 0,
-          'yet another follower': 0
+          'yet another follower': 0,
+          'last follower': 0
         }
       }
     }
   ]);
 });
 
-xtest('leader updates commitIndex when a log has be replicated to a majority of followers', () => {
+test('leader updates commitIndex when a log has be replicated to a majority of followers', () => {
   const peers = #['leader', 'follower', 'another follower'];
   const configuration = #{
     peers
   };
   const node = #{
     id: 'leader',
+    state: #{
+      currentTerm: 1,
+      votedFor: 'leader',
+      log: #[
+        #{
+          term: 1,
+          command: ''
+        },
+        #{
+          term: 1,
+          command: 'do thing'
+        }
+      ]
+    },
     volatileState: #{
       commitIndex: 0,
       lastApplied: 0
@@ -114,7 +150,7 @@ xtest('leader updates commitIndex when a log has be replicated to a majority of 
 
   expect(events).toEqual(#[
     #{
-      type: 'SaveVolatileState',
+      type: 'SaveVolatileLeaderState',
       source: 'leader',
       state: #{
         nextIndex: #{
