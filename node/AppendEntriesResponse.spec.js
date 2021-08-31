@@ -176,7 +176,8 @@ test('leader updates commitIndex when a log has be replicated to a majority of f
     #{
       type: 'ClientCommandsResponse',
       destination: 'client',
-      source: 'leader'
+      source: 'leader',
+      success: true
     }
   ]);
 });

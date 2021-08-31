@@ -44,7 +44,8 @@ export default (node, event) => {
             #{
               type: 'ClientCommandsResponse',
               destination: event.request.clientId,
-              source: node.id
+              source: node.id,
+              success: true
             }
           ]
           : #[])

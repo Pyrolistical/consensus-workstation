@@ -1,6 +1,18 @@
 import * as R from 'ramda';
 
 export default (node, event) => {
+  if (node.configuration.state === 'follower') {
+    return #[
+      #{
+        type: 'ClientCommandsResponse',
+        destination: event.source,
+        source: node.id,
+        success: false,
+        leaderId: node.configuration.leaderId
+      }
+    ];
+  }
+
   const entries = #[
     ...event.commands.map((command) => #{
       term: node.state.currentTerm,
