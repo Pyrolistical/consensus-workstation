@@ -17,7 +17,7 @@ export default (node, event) => {
     return #[
       #{
         type: 'SaveNodeState',
-        source: selfNodeId,
+        source: node.id,
         state: #{
           ...node.state,
           log: #[

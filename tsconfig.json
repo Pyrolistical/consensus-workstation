@@ -1,0 +1,9 @@
+{
+  "include": ["dist/babeled/**/*"],
+  "compilerOptions": {
+    "outDir": "./dist/compiled",
+    "module": "esnext",
+    "target": "esnext",
+    "moduleResolution": "node"
+  }
+}

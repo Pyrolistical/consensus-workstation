@@ -1,20 +1,36 @@
 {
   "name": "consensus-workstation",
   "private": true,
+  "type": "module",
   "dependencies": {
-    "ramda": "0.27.1"
+    "ramda": "0.27.1",
+    "rimraf": "3.0.2"
   },
   "devDependencies": {
+    "@babel/cli": "7.14.8",
     "@babel/core": "7.15.0",
     "@babel/plugin-proposal-record-and-tuple": "7.14.5",
+    "@babel/plugin-syntax-typescript": "7.14.5",
     "@babel/preset-env": "7.15.0",
     "@bloomberg/record-tuple-polyfill": "0.0.3",
+    "@types/jest": "27.0.1",
     "babel-jest": "27.0.6",
-    "jest": "27.0.6"
+    "jest": "27.0.6",
+    "typescript": "4.4.2"
   },
   "scripts": {
     "start": "webpack serve --mode development",
-    "test": "jest",
-    "build": "webpack build --mode development"
+    "test": "NODE_OPTIONS=--experimental-vm-modules jest",
+    "clean": "rimraf dist",
+    "build:babel": "babel . --ignore node_modules --out-dir dist/babeled --extensions '.ts'",
+    "build:js2ts": "find dist -type f | xargs -I FILE -n1 bash -c 'mv FILE `<<< FILE perl -pe '\"'\"'s/^(.+)\\.js$/\\1.ts/'\"'\"'`'",
+    "prebuild": "npm run clean && npm run build:babel && npm run build:js2ts",
+    "build": "tsc"
+  },
+  "jest": {
+    "transform": {},
+    "testMatch": [
+      "<rootDir>/dist/compiled/*.spec.js"
+    ]
   }
 }

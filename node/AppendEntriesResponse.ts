@@ -59,7 +59,7 @@ export default (node, event) => {
           ...node.volatileLeaderState,
           nextIndex: #{
             ...node.volatileLeaderState.nextState,
-            [event.source]: nodevolatileLeaderState.nextIndex[event.source] - 1
+            [event.source]: node.volatileLeaderState.nextIndex[event.source] - 1
           }
         }
       }
