@@ -1,4 +1,4 @@
-import next from './ClientRequest';
+import next from './ClientCommandsRequest';
 
 test('client request are distributed from leader to peers', () => {
     const peers = #['leader', 'follower', 'another follower'];
@@ -35,7 +35,7 @@ test('client request are distributed from leader to peers', () => {
     };
 
     const events = next(node, #{
-      type: 'ClientRequest',
+      type: 'ClientCommandsRequest',
       source: 'client',
       destination: 'leader',
       commands: #['do thing']
@@ -62,6 +62,8 @@ test('client request are distributed from leader to peers', () => {
       },
       #{
         type: 'AppendEntriesRequest',
+        clientId: 'client',
+        source: 'leader',
         destination: 'follower',
         term: 1,
         leaderId: 'leader',
@@ -77,6 +79,8 @@ test('client request are distributed from leader to peers', () => {
       },
       #{
         type: 'AppendEntriesRequest',
+        clientId: 'client',
+        source: 'leader',
         destination: 'another follower',
         term: 1,
         leaderId: 'leader',

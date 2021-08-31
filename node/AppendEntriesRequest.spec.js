@@ -26,6 +26,7 @@ test('followers response success if append entries request passes consistency ch
 
   const events = next(node, #{
     type: 'AppendEntriesRequest',
+    clientId: 'client',
     source: 'leader',
     destination: 'follower',
     term: 1,
@@ -71,6 +72,7 @@ test('followers response success if append entries request passes consistency ch
       success: true,
       request: #{
         type: 'AppendEntriesRequest',
+        clientId: 'client',
         source: 'leader',
         destination: 'follower',
         term: 1,
@@ -119,6 +121,7 @@ test('followers update their commitIndex with the leaderCommit', () => {
 
   const events = next(node, #{
     type: 'AppendEntriesRequest',
+    clientId: 'client',
     source: 'leader',
     destination: 'follower',
     term: 1,
@@ -149,6 +152,7 @@ test('followers update their commitIndex with the leaderCommit', () => {
       success: true,
       request: #{
         type: 'AppendEntriesRequest',
+        clientId: 'client',
         source: 'leader',
         destination: 'follower',
         term: 1,

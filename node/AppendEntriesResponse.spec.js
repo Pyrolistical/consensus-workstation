@@ -49,6 +49,7 @@ test('leader updates nextIndex and matchIndex on successful AppendEntries', () =
       success: true,
       request: #{
         type: 'AppendEntriesRequest',
+        clientId: 'client',
         source: 'leader',
         destination: 'follower',
         term: 1,
@@ -132,6 +133,7 @@ test('leader updates commitIndex when a log has be replicated to a majority of f
       success: true,
       request: #{
         type: 'AppendEntriesRequest',
+        clientId: 'client',
         source: 'leader',
         destination: 'follower',
         term: 1,
@@ -170,6 +172,11 @@ test('leader updates commitIndex when a log has be replicated to a majority of f
         commitIndex: 1,
         lastApplied: 0
       }
+    },
+    #{
+      type: 'ClientCommandsResponse',
+      destination: 'client',
+      source: 'leader'
     }
   ]);
 });

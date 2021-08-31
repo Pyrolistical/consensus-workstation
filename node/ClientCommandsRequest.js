@@ -23,6 +23,8 @@ export default (node, event) => {
       R.reject(R.equals(node.id)),
       R.map((peer) => #{
         type: 'AppendEntriesRequest',
+        clientId: event.source,
+        source: node.id,
         destination: peer,
         term: node.state.currentTerm,
         leaderId: node.id,

@@ -40,6 +40,11 @@ export default (node, event) => {
                 ...node.volatileState,
                 commitIndex: majorityMatchIndex
               }
+            },
+            #{
+              type: 'ClientCommandsResponse',
+              destination: event.request.clientId,
+              source: node.id
             }
           ]
           : #[])
