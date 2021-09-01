@@ -184,10 +184,10 @@ test('leader updates commitIndex when a log has be replicated to a majority of f
 
 describe('calculateMajorityMatchIndex', () => {
   test.each([
-    {leaderIndex: 1, matchIndex: #{f1: 0, f2: 0}, expectedMajority: 0},
-    {leaderIndex: 1, matchIndex: #{f1: 1, f2: 0}, expectedMajority: 1},
-    {leaderIndex: 3, matchIndex: #{f1: 3, f2: 2, f3: 1, f4: 1}, expectedMajority: 2}
-  ])('leaderIndex $leaderIndex & $matchIndex should have majority of $expectedMajority', ({leaderIndex, matchIndex, expectedMajority}) => {
-    expect(calculateMajorityMatchIndex(leaderIndex, matchIndex)).toBe(expectedMajority);
+    {majorityThreshold: 1.5, leaderIndex: 1, matchIndex: #{f1: 0, f2: 0}, expectedMajority: 0},
+    {majorityThreshold: 1.5, leaderIndex: 1, matchIndex: #{f1: 1, f2: 0}, expectedMajority: 1},
+    {majorityThreshold: 2.5, leaderIndex: 3, matchIndex: #{f1: 3, f2: 2, f3: 1, f4: 1}, expectedMajority: 2}
+  ])('leaderIndex $leaderIndex & $matchIndex should have majority of $expectedMajority', ({majorityThreshold, leaderIndex, matchIndex, expectedMajority}) => {
+    expect(calculateMajorityMatchIndex(majorityThreshold, leaderIndex, matchIndex)).toBe(expectedMajority);
   })
 })
