@@ -110,7 +110,7 @@ export interface Configuration {
 
 export type NodeState = {
   currentTerm: number;
-  votedFor: NodeId;
+  votedFor: NodeId | null;
   log: Entry[];
 };
 
