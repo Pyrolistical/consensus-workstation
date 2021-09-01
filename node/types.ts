@@ -41,19 +41,19 @@ export interface AppendEntriesResponse extends NetworkMessage {
   request: AppendEntriesRequest;
 }
 
-export interface RequestVotesRequest extends NetworkMessage {
-  type: "RequestVotesRequest";
-  destination: NodeId;
+export interface RequestVoteRequest extends NetworkMessage {
+  type: "RequestVoteRequest";
   term: number;
   candidateId: NodeId;
   lastLogIndex: number;
   lastLogTerm: number;
 }
 
-export interface RequestVotesResponse extends NetworkMessage {
-  type: "RequestVotesResponse";
+export interface RequestVoteResponse extends NetworkMessage {
+  type: "RequestVoteResponse";
   term: number;
   voteGranted: boolean;
+  request: RequestVoteRequest;
 }
 
 export interface Timer {
@@ -164,8 +164,8 @@ export type Event =
   | ClientCommandsResponse
   | AppendEntriesRequest
   | AppendEntriesResponse
-  | RequestVotesRequest
-  | RequestVotesResponse
+  | RequestVoteRequest
+  | RequestVoteResponse
   | ElectionTimerReset
   | ElectionTimerEnded
   | EmptyAppendEntriesTimerStarted

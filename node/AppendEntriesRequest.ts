@@ -15,7 +15,7 @@ export default (node: Node, event: AppendEntriesRequest): Event[] => {
       }
     ];
   }
-  const descended = node.mode === 'leader' && event.term > node.state.currentTerm;
+  const descended = node.mode !== 'follower' && event.term > node.state.currentTerm;
 
   const conflict = R.path([event.prevLogIndex, 'term'], node.state.log) !== event.prevLogTerm;
   if (conflict) {
