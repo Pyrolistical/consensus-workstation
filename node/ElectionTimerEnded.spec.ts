@@ -42,6 +42,7 @@ test('election started after leader fails', () => {
     },
     #{
       type: 'RequestVotesRequest',
+      source: 'follower',
       destination: 'leader',
       term: 2,
       candidateId: 'follower',
@@ -50,6 +51,7 @@ test('election started after leader fails', () => {
     },
     #{
       type: 'RequestVotesRequest',
+      source: 'follower',
       destination: 'another follower',
       term: 2,
       candidateId: 'follower',

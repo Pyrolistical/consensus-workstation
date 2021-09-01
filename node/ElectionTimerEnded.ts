@@ -1,6 +1,7 @@
 import * as R from 'ramda';
+import {ElectionTimerEnded, Event} from './events';
 
-export default (node, event) => {
+export default (node, event: ElectionTimerEnded): Event[] => {
   return #[
     #{
       type: 'SaveNodeState',
@@ -16,6 +17,7 @@ export default (node, event) => {
         const { term: lastLogTerm } = R.last(node.state.log);
         return #{
           type: 'RequestVotesRequest',
+          source: node.id,
           destination: nodeId,
           term: node.state.currentTerm + 1,
           candidateId: node.id,

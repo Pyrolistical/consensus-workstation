@@ -70,7 +70,7 @@ test('leader updates nextIndex and matchIndex on successful AppendEntries', () =
     #{
       type: 'SaveVolatileLeaderState',
       source: 'leader',
-      state: #{
+      volatileLeaderState: #{
         nextIndex: #{
           follower: 2,
           'another follower': 1,
@@ -154,7 +154,7 @@ test('leader updates commitIndex when a log has be replicated to a majority of f
     #{
       type: 'SaveVolatileLeaderState',
       source: 'leader',
-      state: #{
+      volatileLeaderState: #{
         nextIndex: #{
           follower: 2,
           'another follower': 1

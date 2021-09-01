@@ -1,6 +1,8 @@
 import * as R from 'ramda';
 
-export default (node, event) => {
+import {ClientCommandsRequest, Event} from './events';
+
+export default (node, event: ClientCommandsRequest): Event[] => {
   if (node.configuration.state === 'follower') {
     return #[
       #{

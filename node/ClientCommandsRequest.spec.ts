@@ -1,5 +1,7 @@
 import next from './ClientCommandsRequest';
 
+import {AppendEntriesRequest, Event} from './events'
+
 test('client request are distributed from leader to peers', () => {
   const peers = #['leader', 'follower', 'another follower'];
   const configuration = #{

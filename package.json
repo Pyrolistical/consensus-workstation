@@ -20,10 +20,11 @@
   },
   "scripts": {
     "start": "webpack serve --mode development",
+    "pretest": "npm run build",
     "test": "NODE_OPTIONS=--experimental-vm-modules jest",
     "clean": "rimraf dist",
     "build:babel": "babel . --ignore node_modules --out-dir dist/babeled --extensions '.ts'",
-    "build:js2ts": "find dist -type f | xargs -I FILE -n1 bash -c 'mv FILE `<<< FILE perl -pe '\"'\"'s/^(.+)\\.js$/\\1.ts/'\"'\"'`'",
+    "build:js2ts": "node ./js2ts.mjs ./dist/babeled",
     "prebuild": "npm run clean && npm run build:babel && npm run build:js2ts",
     "build": "tsc"
   },

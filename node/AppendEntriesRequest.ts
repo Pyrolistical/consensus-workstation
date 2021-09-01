@@ -1,13 +1,17 @@
 import * as R from 'ramda';
 
-export default (node, event) => {
+import {AppendEntriesRequest, Event} from './events';
+
+export default (node, event: AppendEntriesRequest): Event[] => {
   if (event.term < node.state.currentTerm) {
     return #[
       #{
         type: 'AppendEntriesResponse',
         destination: event.source,
+        source: node.id,
         term: node.state.currentTerm,
-        success: false
+        success: false,
+        request: event
       }
     ];
   }
@@ -31,6 +35,7 @@ export default (node, event) => {
       },
       #{
         type: 'AppendEntriesResponse',
+        source: node.id,
         destination: event.source,
         term: node.state.currentTerm,
         success: false,
@@ -51,7 +56,7 @@ export default (node, event) => {
           }
         }
       ]
-      : #[]),
+      : #[]) as Event[],
     ...(event.entries.length > 0
       ? #[
         #{
@@ -66,13 +71,14 @@ export default (node, event) => {
           }
         }
       ]
-      : #[]),
+      : #[]) as Event[],
     #{
       type: 'ElectionTimerReset',
       source: node.id
     },
     #{
       type: 'AppendEntriesResponse',
+      source: node.id,
       destination: event.source,
       term: node.state.currentTerm,
       success: true,

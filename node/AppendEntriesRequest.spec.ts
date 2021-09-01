@@ -67,6 +67,7 @@ test('followers response success if append entries request passes consistency ch
     },
     #{
       type: 'AppendEntriesResponse',
+      source: 'follower',
       destination: 'leader',
       term: 1,
       success: true,
@@ -147,6 +148,7 @@ test('followers update their commitIndex with the leaderCommit', () => {
     },
     #{
       type: 'AppendEntriesResponse',
+      source: 'follower',
       destination: 'leader',
       term: 1,
       success: true,
