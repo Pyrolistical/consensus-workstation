@@ -3,10 +3,6 @@ export type NetworkMessage = {
   destination: NodeId;
 };
 
-export type Typed = {
-  type: string;
-};
-
 export type NodeId = string;
 
 export type Command = string;
@@ -16,18 +12,18 @@ export type Entry = {
   command: Command;
 };
 
-export interface ClientCommandsRequest extends Typed, NetworkMessage {
+export interface ClientCommandsRequest extends NetworkMessage {
   type: "ClientCommandsRequest";
   commands: Command[];
 }
 
-export interface ClientCommandsResponse extends Typed, NetworkMessage {
+export interface ClientCommandsResponse extends NetworkMessage {
   type: "ClientCommandsResponse";
   success: boolean;
   leaderId?: string;
 }
 
-export interface AppendEntriesRequest extends Typed, NetworkMessage {
+export interface AppendEntriesRequest extends NetworkMessage {
   type: "AppendEntriesRequest";
   clientId: string;
   term: number;
@@ -38,14 +34,14 @@ export interface AppendEntriesRequest extends Typed, NetworkMessage {
   leaderCommit: number;
 }
 
-export interface AppendEntriesResponse extends Typed, NetworkMessage {
+export interface AppendEntriesResponse extends NetworkMessage {
   type: "AppendEntriesResponse";
   term: number;
   success: boolean;
   request: AppendEntriesRequest;
 }
 
-export interface RequestVotesRequest extends Typed, NetworkMessage {
+export interface RequestVotesRequest extends NetworkMessage {
   type: "RequestVotesRequest";
   destination: NodeId;
   term: number;
@@ -54,7 +50,7 @@ export interface RequestVotesRequest extends Typed, NetworkMessage {
   lastLogTerm: number;
 }
 
-export interface RequestVotesResponse extends Typed, NetworkMessage {
+export interface RequestVotesResponse extends NetworkMessage {
   type: "RequestVotesResponse";
   term: number;
   voteGranted: boolean;
@@ -64,20 +60,20 @@ export interface Timer {
   // timeout: number;
 }
 
-export interface ElectionTimerReset extends Typed, Timer {
+export interface ElectionTimerReset extends Timer {
   type: "ElectionTimerReset";
   source: NodeId;
 }
-export interface ElectionTimerEnded extends Typed, Timer {
+export interface ElectionTimerEnded extends Timer {
   type: "ElectionTimerEnded";
   destination: NodeId;
   // elapsed: number;
 }
 
-export interface EmptyAppendEntriesTimerStarted extends Typed, Timer {
+export interface EmptyAppendEntriesTimerStarted extends Timer {
   type: "EmptyAppendEntriesTimerStarted";
 }
-export interface EmptyAppendEntriesTimerEnded extends Typed, Timer {
+export interface EmptyAppendEntriesTimerEnded extends Timer {
   type: "EmptyAppendEntriesTimerEnded";
   elapsed: number;
 }
@@ -130,31 +126,39 @@ export type VolatileLeaderState = {
   };
 };
 
-export interface SaveConfiguration extends Typed {
+export interface ChangeMode {
+  type: "ChangeMode";
+  source: NodeId;
+  mode: 'leader' | 'follower' | 'candidate';
+  leaderId?: NodeId;
+}
+
+export interface SaveConfiguration {
   type: "SaveConfiguration";
   source: NodeId;
   configuration: Configuration;
 }
 
-export interface SaveNodeState extends Typed {
+export interface SaveNodeState {
   type: "SaveNodeState";
   source: NodeId;
   state: NodeState;
 }
 
-export interface SaveVolatileState extends Typed {
+export interface SaveVolatileState {
   type: "SaveVolatileState";
   source: NodeId;
   volatileState: VolatileState;
 }
 
-export interface SaveVolatileLeaderState extends Typed {
+export interface SaveVolatileLeaderState {
   type: "SaveVolatileLeaderState";
   source: NodeId;
   volatileLeaderState: VolatileLeaderState;
 }
 
 export type Event =
+  | ChangeMode
   | ClientCommandsRequest
   | ClientCommandsResponse
   | AppendEntriesRequest

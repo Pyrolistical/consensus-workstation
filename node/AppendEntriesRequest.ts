@@ -15,20 +15,43 @@ export default (node: Node, event: AppendEntriesRequest): Event[] => {
       }
     ];
   }
+  const descended = node.mode === 'leader' && event.term > node.state.currentTerm;
 
   const conflict = R.path([event.prevLogIndex, 'term'], node.state.log) !== event.prevLogTerm;
   if (conflict) {
     return #[
-      #{
-        type: 'SaveNodeState',
-        source: node.id,
-        state: #{
-          ...node.state,
-          log: #[
-            ...R.drop(event.prevLogIndex, node.state.log)
-          ]
-        }
-      },
+      ...(descended
+        ? #[
+          #{
+            type: 'ChangeMode',
+            source: node.id,
+            mode: 'follower',
+            leaderId: event.source
+          },
+          #{
+            type: 'SaveNodeState',
+            source: node.id,
+            state: #{
+              ...node.state,
+              currentTerm: event.term,
+              log: #[
+                ...R.drop(event.prevLogIndex, node.state.log)
+              ]
+            }
+          }
+        ]
+        : #[
+          #{
+            type: 'SaveNodeState',
+            source: node.id,
+            state: #{
+              ...node.state,
+              log: #[
+                ...R.drop(event.prevLogIndex, node.state.log)
+              ]
+            }
+          }
+        ]) as Event[],
       #{
         type: 'ElectionTimerReset',
         source: node.id
@@ -44,34 +67,62 @@ export default (node: Node, event: AppendEntriesRequest): Event[] => {
     ];
   }
 
+  const result: Event[] = [];
+  if (event.leaderCommit > node.volatileState.commitIndex) {
+    result.push(#{
+      type: 'SaveVolatileState',
+      source: node.id,
+      volatileState: #{
+        ...node.volatileState,
+        commitIndex: event.leaderCommit
+      }
+    });
+  }
+  if (descended) {
+    result.push(#{
+      type: 'ChangeMode',
+      source: node.id,
+      mode: 'follower',
+      leaderId: event.source
+    });
+    if (event.entries.length > 0) {
+      result.push(#{
+        type: 'SaveNodeState',
+        source: node.id,
+        state: #{
+          ...node.state,
+          currentTerm: event.term,
+          log: #[
+            ...node.state.log,
+            ...event.entries
+          ]
+        }
+      });
+    } else {
+      result.push(#{
+        type: 'SaveNodeState',
+        source: node.id,
+        state: #{
+          ...node.state,
+          currentTerm: event.term
+        }
+      });
+    }
+  } else if (event.entries.length > 0) {
+    result.push(#{
+      type: 'SaveNodeState',
+      source: node.id,
+      state: #{
+        ...node.state,
+        log: #[
+          ...node.state.log,
+          ...event.entries
+        ]
+      }
+    });
+  }
   return #[
-    ...(event.leaderCommit > node.volatileState.commitIndex
-      ? #[
-        #{
-          type: 'SaveVolatileState',
-          source: node.id,
-          volatileState: #{
-            ...node.volatileState,
-            commitIndex: event.leaderCommit
-          }
-        }
-      ]
-      : #[]) as Event[],
-    ...(event.entries.length > 0
-      ? #[
-        #{
-          type: 'SaveNodeState',
-          source: node.id,
-          state: #{
-            ...node.state,
-            log: #[
-              ...node.state.log,
-              ...event.entries
-            ]
-          }
-        }
-      ]
-      : #[]) as Event[],
+    ...result,
     #{
       type: 'ElectionTimerReset',
       source: node.id
@@ -80,7 +131,7 @@ export default (node: Node, event: AppendEntriesRequest): Event[] => {
       type: 'AppendEntriesResponse',
       source: node.id,
       destination: event.source,
-      term: node.state.currentTerm,
+      term: event.term,
       success: true,
       request: event
     }
