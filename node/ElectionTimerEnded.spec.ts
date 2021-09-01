@@ -2,15 +2,15 @@ import next from './ElectionTimerEnded';
 
 test('election started after leader fails', () => {
   const node = #{
-    id: 'follower',
+    id: 'B',
     mode: 'follower' as const,
-    leaderId: 'leader',
+    leaderId: 'A',
     configuration: #{
-      peers: #['leader', 'follower', 'another follower']
+      peers: #['A', 'B', 'C']
     },
     state: #{
       currentTerm: 1,
-      votedFor: 'leader',
+      votedFor: 'A',
       log: #[
         #{
           term: 1,
@@ -26,16 +26,21 @@ test('election started after leader fails', () => {
 
   const events = next(node, #{
     type: 'ElectionTimerEnded',
-    destination: 'follower'
+    destination: 'B'
   });
 
   expect(events).toEqual(#[
     #{
+      type: 'ChangeMode',
+      source: 'B',
+      mode: 'candidate'
+    },
+    #{
       type: 'SaveNodeState',
-      source: 'follower',
+      source: 'B',
       state: #{
         currentTerm: 2,
-        votedFor: 'leader',
+        votedFor: 'A',
         log: #[
           #{
             term: 1,
@@ -46,25 +51,25 @@ test('election started after leader fails', () => {
     },
     #{
       type: 'RequestVotesRequest',
-      source: 'follower',
-      destination: 'leader',
+      source: 'B',
+      destination: 'A',
       term: 2,
-      candidateId: 'follower',
+      candidateId: 'B',
       lastLogIndex: 0,
       lastLogTerm: 1
     },
     #{
       type: 'RequestVotesRequest',
-      source: 'follower',
-      destination: 'another follower',
+      source: 'B',
+      destination: 'C',
       term: 2,
-      candidateId: 'follower',
+      candidateId: 'B',
       lastLogIndex: 0,
       lastLogTerm: 1
     },
     #{
       type: 'ElectionTimerStarted',
-      source: 'follower'
+      source: 'B'
     }
   ]);
 });

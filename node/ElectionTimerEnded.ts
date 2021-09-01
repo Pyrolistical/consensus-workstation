@@ -4,6 +4,11 @@ import {Node, ElectionTimerEnded, Event} from './types';
 export default (node: Node, event: ElectionTimerEnded): Event[] => {
   return #[
     #{
+      type: 'ChangeMode',
+      source: node.id,
+      mode: 'candidate'
+    },
+    #{
       type: 'SaveNodeState',
       source: node.id,
       state: #{
