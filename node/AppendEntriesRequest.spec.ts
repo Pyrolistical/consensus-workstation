@@ -1,17 +1,13 @@
 import next from './AppendEntriesRequest'
 
-import {FollowerConfiguration} from './types';
-
 test('followers response success if append entries request passes consistency check', () => {
-  const peers = #['leader', 'follower', 'another follower'];
-  const configuration: FollowerConfiguration = #{
-    peers,
-    state: 'follower',
-    leaderId: 'leader'
-  };
   const node = #{
     id: 'follower',
-    configuration,
+    mode: 'follower' as const,
+    leaderId: 'leader',
+    configuration: #{
+      peers: #['leader', 'follower', 'another follower']
+    },
     state: #{
       currentTerm: 1,
       votedFor: 'leader',
@@ -97,15 +93,13 @@ test('followers response success if append entries request passes consistency ch
 });
 
 test('followers update their commitIndex with the leaderCommit', () => {
-  const peers = #['leader', 'follower', 'another follower'];
-  const configuration: FollowerConfiguration = #{
-    peers,
-    state: 'follower',
-    leaderId: 'leader'
-  };
   const node = #{
     id: 'follower',
-    configuration,
+    mode: 'follower' as const,
+    leaderId: 'leader',
+    configuration: #{
+      peers: #['leader', 'follower', 'another follower']
+    },
     state: #{
       currentTerm: 1,
       votedFor: 'leader',

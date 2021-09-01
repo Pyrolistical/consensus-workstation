@@ -1,16 +1,12 @@
 import next from './ClientCommandsRequest';
 
-import {LeaderConfiguration, FollowerConfiguration, AppendEntriesRequest, Event} from './types'
-
 test('client request are distributed from leader to peers', () => {
-  const peers = #['leader', 'follower', 'another follower'];
-  const configuration: LeaderConfiguration = #{
-    peers,
-    state: 'leader'
-  };
   const node = #{
     id: 'leader',
-    configuration,
+    mode: 'leader' as const,
+    configuration: #{
+      peers: #['leader', 'follower', 'another follower']
+    },
     state: #{
       currentTerm: 1,
       votedFor: 'leader',
@@ -101,15 +97,13 @@ test('client request are distributed from leader to peers', () => {
 });
 
 test('client request is rejected if node is not the leader', () => {
-  const peers = #['leader', 'follower', 'another follower'];
-  const configuration: FollowerConfiguration = #{
-    peers,
-    state: 'follower',
-    leaderId: 'leader'
-  };
   const node = #{
     id: 'follower',
-    configuration,
+    mode: 'follower' as const,
+    leaderId: 'leader',
+    configuration: #{
+      peers: #['leader', 'follower', 'another follower']
+    },
     state: #{
       currentTerm: 1,
       votedFor: 'leader',

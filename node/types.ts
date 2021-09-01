@@ -84,6 +84,7 @@ export interface EmptyAppendEntriesTimerEnded extends Typed, Timer {
 
 export interface CommonNode {
   id: NodeId;
+  configuration: Configuration;
   state: NodeState;
   volatileState: VolatileState;
 }
@@ -93,39 +94,22 @@ export type Node = LeaderNode
   | CandidateNode;
 
 export interface LeaderNode extends CommonNode {
-  configuration: LeaderConfiguration;
+  mode: 'leader';
   volatileLeaderState: VolatileLeaderState;
 }
 
 export interface FollowerNode extends CommonNode {
-  configuration: FollowerConfiguration;
+  mode: 'follower';
+  leaderId: NodeId;
 }
 
 export interface CandidateNode extends CommonNode {
-  configuration: CandidateConfiguration;
+  mode: 'candidate';
 }
 
-export interface ConfigurationState {
+export interface Configuration {
   peers: NodeId[];
-  state: string;
 }
-
-export type Configuration = LeaderConfiguration
-  | FollowerConfiguration
-  | CandidateConfiguration;
-
-export interface LeaderConfiguration extends ConfigurationState{
-  state: 'leader';
-};
-
-export interface FollowerConfiguration extends ConfigurationState {
-  state: 'follower';
-  leaderId: NodeId;
-};
-
-export interface CandidateConfiguration extends ConfigurationState {
-  state: 'candidate';
-};
 
 export type NodeState = {
   currentTerm: number;

@@ -3,14 +3,14 @@ import * as R from 'ramda';
 import {Node, ClientCommandsRequest, Event} from './types';
 
 export default (node: Node, event: ClientCommandsRequest): Event[] => {
-  if (node.configuration.state === 'follower') {
+  if (node.mode === 'follower') {
     return #[
       #{
         type: 'ClientCommandsResponse',
         destination: event.source,
         source: node.id,
         success: false,
-        leaderId: node.configuration.leaderId
+        leaderId: node.leaderId
       }
     ];
   }

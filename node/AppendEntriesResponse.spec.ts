@@ -1,16 +1,12 @@
 import next, {calculateMajorityMatchIndex} from './AppendEntriesResponse';
 
-import {LeaderConfiguration} from './types';
-
 test('leader updates nextIndex and matchIndex on successful AppendEntries', () => {
-  const peers = #['leader', 'follower', 'another follower', 'yet another follower', 'last follower'];
-  const configuration: LeaderConfiguration = #{
-    peers,
-    state: 'leader'
-  };
   const node = #{
     id: 'leader',
-    configuration,
+    mode: 'leader' as const,
+    configuration: #{
+      peers: #['leader', 'follower', 'another follower', 'yet another follower', 'last follower']
+    },
     state: #{
       currentTerm: 1,
       votedFor: 'leader',
@@ -46,29 +42,29 @@ test('leader updates nextIndex and matchIndex on successful AppendEntries', () =
   };
 
   const events = next(node, #{
-      type: 'AppendEntriesResponse',
-      source: 'follower',
-      destination: 'leader',
+    type: 'AppendEntriesResponse',
+    source: 'follower',
+    destination: 'leader',
+    term: 1,
+    success: true,
+    request: #{
+      type: 'AppendEntriesRequest',
+      clientId: 'client',
+      source: 'leader',
+      destination: 'follower',
       term: 1,
-      success: true,
-      request: #{
-        type: 'AppendEntriesRequest',
-        clientId: 'client',
-        source: 'leader',
-        destination: 'follower',
-        term: 1,
-        leaderId: 'leader',
-        prevLogIndex: 0,
-        prevLogTerm: 1,
-        entries: #[
-          #{
-            term: 1,
-            command: 'do thing'
-          }
-        ],
-        leaderCommit: 0
-      }
-    })
+      leaderId: 'leader',
+      prevLogIndex: 0,
+      prevLogTerm: 1,
+      entries: #[
+        #{
+          term: 1,
+          command: 'do thing'
+        }
+      ],
+      leaderCommit: 0
+    }
+  });
 
   expect(events).toEqual(#[
     #{
@@ -93,14 +89,12 @@ test('leader updates nextIndex and matchIndex on successful AppendEntries', () =
 });
 
 test('leader updates commitIndex when a log has be replicated to a majority of followers', () => {
-  const peers = #['leader', 'follower', 'another follower'];
-  const configuration: LeaderConfiguration = #{
-    peers,
-    state: 'leader'
-  };
   const node = #{
     id: 'leader',
-    configuration,
+    mode: 'leader' as const,
+    configuration: #{
+      peers: #['leader', 'follower', 'another follower']
+    },
     state: #{
       currentTerm: 1,
       votedFor: 'leader',
