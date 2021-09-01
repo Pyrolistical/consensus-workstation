@@ -20,6 +20,25 @@ export default (node: LeaderNode, event: AppendEntriesResponse): Event[] => {
       [event.source]: event.request.prevLogIndex + event.request.entries.length
     };
     const majorityMatchIndex = calculateMajorityMatchIndex(node.state.log.length - 1, updatedMatchIndex);
+    const result: Event[] = [];
+    if (majorityMatchIndex > node.volatileState.commitIndex) {
+      result.push(
+        #{
+          type: 'SaveVolatileState',
+          source: node.id,
+          volatileState: #{
+            ...node.volatileState,
+            commitIndex: majorityMatchIndex
+          }
+        },
+        #{
+          type: 'ClientCommandsResponse',
+          destination: event.request.clientId,
+          source: node.id,
+          success: true
+        }
+      );
+    }
     return #[
       #{
         type: 'SaveVolatileLeaderState',
@@ -32,24 +51,7 @@ export default (node: LeaderNode, event: AppendEntriesResponse): Event[] => {
           matchIndex: updatedMatchIndex
         }
       },
-      ...(majorityMatchIndex > node.volatileState.commitIndex
-          ? #[
-            #{
-              type: 'SaveVolatileState',
-              source: node.id,
-              volatileState: #{
-                ...node.volatileState,
-                commitIndex: majorityMatchIndex
-              }
-            },
-            #{
-              type: 'ClientCommandsResponse',
-              destination: event.request.clientId,
-              source: node.id,
-              success: true
-            }
-          ]
-          : #[]) as Event[]
+      ...result
     ];
   } else {
     return #[

@@ -19,39 +19,41 @@ export default (node: Node, event: AppendEntriesRequest): Event[] => {
 
   const conflict = R.path([event.prevLogIndex, 'term'], node.state.log) !== event.prevLogTerm;
   if (conflict) {
+    const result: Event[] = [];
+    if (descended) {
+      result.push(
+        #{
+          type: 'ChangeMode',
+          source: node.id,
+          mode: 'follower',
+          leaderId: event.source
+        },
+        #{
+          type: 'SaveNodeState',
+          source: node.id,
+          state: #{
+            ...node.state,
+            currentTerm: event.term,
+            log: #[
+              ...R.drop(event.prevLogIndex, node.state.log)
+            ]
+          }
+        }
+      );
+    } else {
+      result.push(#{
+        type: 'SaveNodeState',
+        source: node.id,
+        state: #{
+          ...node.state,
+          log: #[
+            ...R.drop(event.prevLogIndex, node.state.log)
+          ]
+        }
+      });
+    }
     return #[
-      ...(descended
-        ? #[
-          #{
-            type: 'ChangeMode',
-            source: node.id,
-            mode: 'follower',
-            leaderId: event.source
-          },
-          #{
-            type: 'SaveNodeState',
-            source: node.id,
-            state: #{
-              ...node.state,
-              currentTerm: event.term,
-              log: #[
-                ...R.drop(event.prevLogIndex, node.state.log)
-              ]
-            }
-          }
-        ]
-        : #[
-          #{
-            type: 'SaveNodeState',
-            source: node.id,
-            state: #{
-              ...node.state,
-              log: #[
-                ...R.drop(event.prevLogIndex, node.state.log)
-              ]
-            }
-          }
-        ]) as Event[],
+      ...result,
       #{
         type: 'ElectionTimerReset',
         source: node.id
