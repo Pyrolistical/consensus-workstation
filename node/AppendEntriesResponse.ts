@@ -1,5 +1,5 @@
 import * as R from 'ramda';
-import {AppendEntriesResponse, Event} from './events';
+import {LeaderNode, AppendEntriesResponse, Event} from './types';
 
 export const calculateMajorityMatchIndex = (leaderIndex, matchIndex) => {
   const majorityThreshold = (Object.keys(matchIndex).length + 1) / 2;
@@ -13,7 +13,7 @@ export const calculateMajorityMatchIndex = (leaderIndex, matchIndex) => {
   return -1;
 }
 
-export default (node, event: AppendEntriesResponse): Event[] => {
+export default (node: LeaderNode, event: AppendEntriesResponse): Event[] => {
   if (event.success) {
     const updatedMatchIndex = #{
       ...node.volatileLeaderState.matchIndex,
@@ -59,7 +59,7 @@ export default (node, event: AppendEntriesResponse): Event[] => {
         volatileLeaderState: #{
           ...node.volatileLeaderState,
           nextIndex: #{
-            ...node.volatileLeaderState.nextState,
+            ...node.volatileLeaderState.nextIndex,
             [event.source]: node.volatileLeaderState.nextIndex[event.source] - 1
           }
         }

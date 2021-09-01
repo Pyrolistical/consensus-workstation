@@ -1,7 +1,7 @@
 import * as R from 'ramda';
-import {ElectionTimerEnded, Event} from './events';
+import {Node, ElectionTimerEnded, Event} from './types';
 
-export default (node, event: ElectionTimerEnded): Event[] => {
+export default (node: Node, event: ElectionTimerEnded): Event[] => {
   return #[
     #{
       type: 'SaveNodeState',

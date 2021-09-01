@@ -1,9 +1,13 @@
-import next from './ElectionTimerEnded'
+import next from './ElectionTimerEnded';
+
+import {FollowerConfiguration} from './types';
 
 test('election started after leader fails', () => {
   const peers = #['leader', 'follower', 'another follower'];
-  const configuration = #{
-    peers
+  const configuration: FollowerConfiguration = #{
+    peers,
+    state: 'follower',
+    leaderId: 'leader'
   };
   const node = #{
     id: 'follower',
@@ -17,6 +21,10 @@ test('election started after leader fails', () => {
           command: ''
         }
       ]
+    },
+    volatileState: #{
+      commitIndex: 0,
+      lastApplied: 0
     }
   };
 

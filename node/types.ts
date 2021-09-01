@@ -101,9 +101,51 @@ export interface EmptyAppendEntriesTimerEnded extends Typed, Timer {
   elapsed: number;
 }
 
-export type Configuration = {
+export interface CommonNode {
+  id: NodeId;
+  state: NodeState;
+  volatileState: VolatileState;
+}
+
+export type Node = LeaderNode
+  | FollowerNode
+  | CandidateNode;
+
+export interface LeaderNode extends CommonNode {
+  configuration: LeaderConfiguration;
+  volatileLeaderState: VolatileLeaderState;
+}
+
+export interface FollowerNode extends CommonNode {
+  configuration: FollowerConfiguration;
+}
+
+export interface CandidateNode extends CommonNode {
+  configuration: CandidateConfiguration;
+}
+
+export interface ConfigurationState {
   peers: NodeId[];
+  state: string;
+}
+
+export type Configuration = LeaderConfiguration
+  | FollowerConfiguration
+  | CandidateConfiguration;
+
+export interface LeaderConfiguration extends ConfigurationState{
+  state: 'leader';
 };
+
+export interface FollowerConfiguration extends ConfigurationState {
+  state: 'follower';
+  leaderId: NodeId;
+};
+
+export interface CandidateConfiguration extends ConfigurationState {
+  state: 'candidate';
+};
+
 export type NodeState = {
   currentTerm: number;
   votedFor: NodeId;
@@ -122,19 +164,6 @@ export type VolatileLeaderState = {
     [nodeId: string]: number;
   };
 };
-
-export type NetworkCallState = {
-  nextRequestId: number;
-  inflightRequests: {
-    [requestId: string]: Request;
-  };
-};
-
-export interface SaveNetworkCallState extends Typed, SystemCall {
-  type: "SaveNetworkCallState";
-  source: NodeId;
-  state: NetworkCallState;
-}
 
 export interface SaveConfiguration extends Typed, SystemCall {
   type: "SaveConfiguration";
@@ -171,8 +200,9 @@ export type Event =
   | ElectionTimerEnded
   | EmptyAppendEntriesTimerStarted
   | EmptyAppendEntriesTimerEnded
-  | SaveNetworkCallState
   | SaveConfiguration
   | SaveNodeState
   | SaveVolatileState
   | SaveVolatileLeaderState;
+
+export type EventHandler<N extends Node, E extends Event> = (node: N, event: E) => Event[];

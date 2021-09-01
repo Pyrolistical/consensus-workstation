@@ -1,12 +1,16 @@
-import next, {calculateMajorityMatchIndex} from './AppendEntriesResponse'
+import next, {calculateMajorityMatchIndex} from './AppendEntriesResponse';
+
+import {LeaderConfiguration} from './types';
 
 test('leader updates nextIndex and matchIndex on successful AppendEntries', () => {
   const peers = #['leader', 'follower', 'another follower', 'yet another follower', 'last follower'];
-  const configuration = #{
-    peers
+  const configuration: LeaderConfiguration = #{
+    peers,
+    state: 'leader'
   };
   const node = #{
     id: 'leader',
+    configuration,
     state: #{
       currentTerm: 1,
       votedFor: 'leader',
@@ -90,11 +94,13 @@ test('leader updates nextIndex and matchIndex on successful AppendEntries', () =
 
 test('leader updates commitIndex when a log has be replicated to a majority of followers', () => {
   const peers = #['leader', 'follower', 'another follower'];
-  const configuration = #{
-    peers
+  const configuration: LeaderConfiguration = #{
+    peers,
+    state: 'leader'
   };
   const node = #{
     id: 'leader',
+    configuration,
     state: #{
       currentTerm: 1,
       votedFor: 'leader',

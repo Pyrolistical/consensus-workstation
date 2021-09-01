@@ -1,8 +1,8 @@
 import * as R from 'ramda';
 
-import {AppendEntriesRequest, Event} from './events';
+import {Node, AppendEntriesRequest, Event} from './types';
 
-export default (node, event: AppendEntriesRequest): Event[] => {
+export default (node: Node, event: AppendEntriesRequest): Event[] => {
   if (event.term < node.state.currentTerm) {
     return #[
       #{
