@@ -85,7 +85,8 @@ export interface CommonNode {
   volatileState: VolatileState;
 }
 
-export type Node = LeaderNode
+export type Node =
+  | LeaderNode
   | FollowerNode
   | CandidateNode;
 

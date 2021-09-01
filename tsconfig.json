@@ -4,6 +4,7 @@
     "outDir": "./dist/compiled",
     "module": "esnext",
     "target": "esnext",
-    "moduleResolution": "node"
+    "moduleResolution": "node",
+    "strictNullChecks": true
   }
 }
