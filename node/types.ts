@@ -3,16 +3,6 @@ export type NetworkMessage = {
   destination: NodeId;
 };
 
-export type SystemCall = {};
-
-export type Network = {
-  send(message: NetworkMessage);
-};
-
-export type System = {
-  send(call: SystemCall);
-};
-
 export type Typed = {
   type: string;
 };
@@ -70,16 +60,7 @@ export interface RequestVotesResponse extends Typed, NetworkMessage {
   voteGranted: boolean;
 }
 
-export type Request =
-  | AppendEntriesRequest
-  | ClientCommandsRequest
-  | RequestVotesRequest;
-export type Response =
-  | AppendEntriesResponse
-  | ClientCommandsResponse
-  | RequestVotesResponse;
-
-export interface Timer extends SystemCall {
+export interface Timer {
   // timeout: number;
 }
 
@@ -165,25 +146,25 @@ export type VolatileLeaderState = {
   };
 };
 
-export interface SaveConfiguration extends Typed, SystemCall {
+export interface SaveConfiguration extends Typed {
   type: "SaveConfiguration";
   source: NodeId;
   configuration: Configuration;
 }
 
-export interface SaveNodeState extends Typed, SystemCall {
+export interface SaveNodeState extends Typed {
   type: "SaveNodeState";
   source: NodeId;
   state: NodeState;
 }
 
-export interface SaveVolatileState extends Typed, SystemCall {
+export interface SaveVolatileState extends Typed {
   type: "SaveVolatileState";
   source: NodeId;
   volatileState: VolatileState;
 }
 
-export interface SaveVolatileLeaderState extends Typed, SystemCall {
+export interface SaveVolatileLeaderState extends Typed {
   type: "SaveVolatileLeaderState";
   source: NodeId;
   volatileLeaderState: VolatileLeaderState;
