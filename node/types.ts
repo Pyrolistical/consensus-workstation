@@ -25,7 +25,7 @@ export interface ClientCommandsResponse extends NetworkMessage {
 
 export interface AppendEntriesRequest extends NetworkMessage {
   type: "AppendEntriesRequest";
-  clientId: string;
+  clientId?: string;
   term: number;
   leaderId: NodeId;
   prevLogIndex: number;
@@ -102,6 +102,7 @@ export interface FollowerNode extends CommonNode {
 
 export interface CandidateNode extends CommonNode {
   mode: 'candidate';
+  voteResults: VoteResults;
 }
 
 export interface Configuration {
@@ -125,6 +126,10 @@ export type VolatileLeaderState = {
   matchIndex: {
     [nodeId: string]: number;
   };
+};
+
+export type VoteResults = {
+  [node: NodeId]: boolean;
 };
 
 export interface ChangeMode {
@@ -158,6 +163,12 @@ export interface SaveVolatileLeaderState {
   volatileLeaderState: VolatileLeaderState;
 }
 
+export interface SaveVoteResults {
+  type: "SaveVoteResults";
+  source: NodeId;
+  voteResults: VoteResults;
+}
+
 export type Event =
   | ChangeMode
   | ClientCommandsRequest
@@ -173,6 +184,7 @@ export type Event =
   | SaveConfiguration
   | SaveNodeState
   | SaveVolatileState
-  | SaveVolatileLeaderState;
+  | SaveVolatileLeaderState
+  | SaveVoteResults;
 
 export type EventHandler<N extends Node, E extends Event> = (node: N, event: E) => Event[];
