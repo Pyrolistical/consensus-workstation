@@ -3,7 +3,7 @@ import * as R from 'ramda';
 import {Node, RequestVoteRequest, Event} from './types';
 
 export default (node: Node, event: RequestVoteRequest): Event[] => {
-  const longerLog = R.path([event.lastLogIndex, 'term'], node.state.log) >= event.lastLogTerm && node.state.log.length > event.lastLogIndex;
+  const longerLog = R.path([event.lastLogIndex, 'term'], node.state.log) >= event.lastLogTerm && node.state.log.length - 1 > event.lastLogIndex;
   const alreadyVoted = node.state.currentTerm === event.term && node.state.votedFor !== event.source;
   if (node.state.currentTerm > event.term || longerLog || alreadyVoted) {
     const result: Event[] = [];
