@@ -1,32 +1,32 @@
 import * as R from 'ramda';
 
-import {CandidateNode, RequestVoteResponse, Event} from './types';
+import { CandidateNode, RequestVoteResponse, Event } from './types';
 
 export default (node: CandidateNode, event: RequestVoteResponse): Event[] => {
   const majorityThreshold = node.configuration.peers.length / 2;
-  const voteResults = #{
+  const voteResults = {
     ...node.voteResults,
     [event.source]: event.voteGranted
   };
   if (Object.values(voteResults).filter(R.identity).length > majorityThreshold) {
-    return #[
-      #{
+    return [
+      {
         type: 'ChangeMode',
         source: node.id,
         mode: 'leader'
       },
-      #{
+      {
         type: 'SaveVolatileLeaderState',
         source: 'A',
-        volatileLeaderState: #{
-          nextIndex: #{
+        volatileLeaderState: {
+          nextIndex: {
             ...R.pipe(
               R.reject(R.equals(node.id)),
               R.map((peer) => [peer, node.state.log.length]),
               R.fromPairs()
             )([...node.configuration.peers])
           },
-          matchIndex: #{
+          matchIndex: {
             ...R.pipe(
               R.reject(R.equals(node.id)),
               R.map((peer) => [peer, node.state.log.length - 1]),
@@ -37,7 +37,7 @@ export default (node: CandidateNode, event: RequestVoteResponse): Event[] => {
       },
       ...R.pipe(
         R.reject(R.equals(node.id)),
-        R.map((peer) => #{
+        R.map((peer) => ({
           type: 'AppendEntriesRequest',
           source: node.id,
           destination: peer,
@@ -45,14 +45,14 @@ export default (node: CandidateNode, event: RequestVoteResponse): Event[] => {
           leaderId: node.id,
           prevLogIndex: node.state.log.length - 1,
           prevLogTerm: node.state.log[node.state.log.length - 1].term,
-          entries: #[],
+          entries: [],
           leaderCommit: node.volatileState.commitIndex
-        })
+        }))
       )(node.configuration.peers)
     ];
   } else {
-    return #[
-      #{
+    return [
+      {
         type: 'SaveVoteResults',
         source: node.id,
         voteResults

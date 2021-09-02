@@ -1,65 +1,65 @@
 import next from './ClientCommandsRequest';
 
 test('client request are distributed from leader to peers', () => {
-  const node = #{
+  const node = {
     id: 'leader',
     mode: 'leader' as const,
-    configuration: #{
-      peers: #['leader', 'follower', 'another follower']
+    configuration: {
+      peers: ['leader', 'follower', 'another follower']
     },
-    state: #{
+    state: {
       currentTerm: 1,
       votedFor: 'leader',
-      log: #[
-        #{
+      log: [
+        {
           term: 1,
           command: ''
         }
       ]
     },
-    volatileState: #{
+    volatileState: {
       commitIndex: 0,
       lastApplied: 0
     },
-    volatileLeaderState: #{
-      nextIndex: #{
+    volatileLeaderState: {
+      nextIndex: {
         follower: 1,
         'another follower': 1
       },
-      matchIndex: #{
+      matchIndex: {
         follower: 0,
         'another follower': 0
       }
     }
   };
 
-  const events = next(node, #{
+  const events = next(node, {
     type: 'ClientCommandsRequest',
     source: 'client',
     destination: 'leader',
-    commands: #['do thing']
+    commands: ['do thing']
   });
 
-  expect(events).toEqual(#[
-    #{
+  expect(events).toEqual([
+    {
       type: 'SaveNodeState',
       source: 'leader',
-      state: #{
+      state: {
         currentTerm: 1,
         votedFor: 'leader',
-        log: #[
-          #{
+        log: [
+          {
             term: 1,
             command: ''
           },
-          #{
+          {
             term: 1,
             command: 'do thing'
           }
         ]
       }
     },
-    #{
+    {
       type: 'AppendEntriesRequest',
       clientId: 'client',
       source: 'leader',
@@ -68,15 +68,15 @@ test('client request are distributed from leader to peers', () => {
       leaderId: 'leader',
       prevLogIndex: 0,
       prevLogTerm: 1,
-      entries: #[
-        #{
+      entries: [
+        {
           term: 1,
           command: 'do thing'
         }
       ],
       leaderCommit: 0
     },
-    #{
+    {
       type: 'AppendEntriesRequest',
       clientId: 'client',
       source: 'leader',
@@ -85,8 +85,8 @@ test('client request are distributed from leader to peers', () => {
       leaderId: 'leader',
       prevLogIndex: 0,
       prevLogTerm: 1,
-      entries: #[
-        #{
+      entries: [
+        {
           term: 1,
           command: 'do thing'
         }
@@ -97,38 +97,38 @@ test('client request are distributed from leader to peers', () => {
 });
 
 test('client request is rejected if node is not the leader', () => {
-  const node = #{
+  const node = {
     id: 'follower',
     mode: 'follower' as const,
     leaderId: 'leader',
-    configuration: #{
-      peers: #['leader', 'follower', 'another follower']
+    configuration: {
+      peers: ['leader', 'follower', 'another follower']
     },
-    state: #{
+    state: {
       currentTerm: 1,
       votedFor: 'leader',
-      log: #[
-        #{
+      log: [
+        {
           term: 1,
           command: ''
         }
       ]
     },
-    volatileState: #{
+    volatileState: {
       commitIndex: 0,
       lastApplied: 0
     }
   };
 
-  const events = next(node, #{
+  const events = next(node, {
     type: 'ClientCommandsRequest',
     source: 'client',
     destination: 'follower',
-    commands: #['do thing']
+    commands: ['do thing']
   });
 
-  expect(events).toEqual(#[
-    #{
+  expect(events).toEqual([
+    {
       type: 'ClientCommandsResponse',
       destination: 'client',
       source: 'follower',

@@ -1,17 +1,17 @@
 import * as R from 'ramda';
-import {Node, ElectionTimerEnded, Event} from './types';
+import { Node, ElectionTimerEnded, Event } from './types';
 
 export default (node: Node, event: ElectionTimerEnded): Event[] => {
-  return #[
-    #{
+  return [
+    {
       type: 'ChangeMode',
       source: node.id,
       mode: 'candidate'
     },
-    #{
+    {
       type: 'SaveNodeState',
       source: node.id,
-      state: #{
+      state: {
         ...node.state,
         currentTerm: node.state.currentTerm + 1
       }
@@ -20,7 +20,7 @@ export default (node: Node, event: ElectionTimerEnded): Event[] => {
       R.reject(R.equals(node.id)),
       R.map(nodeId => {
         const { term: lastLogTerm } = R.last(node.state.log);
-        return #{
+        return {
           type: 'RequestVotesRequest',
           source: node.id,
           destination: nodeId,
@@ -31,7 +31,7 @@ export default (node: Node, event: ElectionTimerEnded): Event[] => {
         };
       })
     )(node.configuration.peers),
-    #{
+    {
       type: 'ElectionTimerStarted',
       source: node.id
     }

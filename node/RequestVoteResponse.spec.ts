@@ -1,38 +1,38 @@
 import next from './RequestVoteResponse'
 
 test('save vote results before majority is reached', () => {
-  const node = #{
+  const node = {
     id: 'A',
     mode: 'candidate' as const,
-    configuration: #{
-      peers: #['A', 'B', 'C']
+    configuration: {
+      peers: ['A', 'B', 'C']
     },
-    state: #{
+    state: {
       currentTerm: 3,
       votedFor: 'A',
-      log: #[
-        #{
-        term: 1,
-        command: ''
+      log: [
+        {
+          term: 1,
+          command: ''
         }
       ]
     },
-    volatileState: #{
+    volatileState: {
       commitIndex: 0,
       lastApplied: 0
     },
-    voteResults: #{
+    voteResults: {
       A: true
     }
   };
 
-  const events = next(node, #{
+  const events = next(node, {
     type: 'RequestVoteResponse',
     source: 'B',
     destination: 'A',
     term: 3,
     voteGranted: false,
-    request: #{
+    request: {
       type: 'RequestVoteRequest',
       source: 'A',
       destination: 'B',
@@ -43,11 +43,11 @@ test('save vote results before majority is reached', () => {
     }
   });
 
-  expect(events).toEqual(#[
-    #{
+  expect(events).toEqual([
+    {
       type: 'SaveVoteResults',
       source: 'A',
-      voteResults: #{
+      voteResults: {
         A: true,
         B: false
       }
@@ -56,38 +56,38 @@ test('save vote results before majority is reached', () => {
 });
 
 test('become the leader if received majority votes', () => {
-  const node = #{
+  const node = {
     id: 'A',
     mode: 'candidate' as const,
-    configuration: #{
-      peers: #['A', 'B', 'C']
+    configuration: {
+      peers: ['A', 'B', 'C']
     },
-    state: #{
+    state: {
       currentTerm: 3,
       votedFor: 'A',
-      log: #[
-        #{
+      log: [
+        {
           term: 1,
           command: ''
         }
       ]
     },
-    volatileState: #{
+    volatileState: {
       commitIndex: 1,
       lastApplied: 0
     },
-    voteResults: #{
+    voteResults: {
       A: true
     }
   };
 
-  const events = next(node, #{
+  const events = next(node, {
     type: 'RequestVoteResponse',
     source: 'B',
     destination: 'A',
     term: 3,
     voteGranted: true,
-    request: #{
+    request: {
       type: 'RequestVoteRequest',
       source: 'A',
       destination: 'B',
@@ -98,27 +98,27 @@ test('become the leader if received majority votes', () => {
     }
   });
 
-  expect(events).toEqual(#[
-    #{
+  expect(events).toEqual([
+    {
       type: 'ChangeMode',
       source: 'A',
       mode: 'leader'
     },
-    #{
+    {
       type: 'SaveVolatileLeaderState',
       source: 'A',
-      volatileLeaderState: #{
-        nextIndex: #{
+      volatileLeaderState: {
+        nextIndex: {
           B: 1,
           C: 1
         },
-        matchIndex: #{
+        matchIndex: {
           B: 0,
           C: 0
         }
       }
     },
-    #{
+    {
       type: 'AppendEntriesRequest',
       source: 'A',
       destination: 'B',
@@ -126,10 +126,10 @@ test('become the leader if received majority votes', () => {
       leaderId: 'A',
       prevLogIndex: 0,
       prevLogTerm: 1,
-      entries: #[],
+      entries: [],
       leaderCommit: 1
     },
-    #{
+    {
       type: 'AppendEntriesRequest',
       source: 'A',
       destination: 'C',
@@ -137,7 +137,7 @@ test('become the leader if received majority votes', () => {
       leaderId: 'A',
       prevLogIndex: 0,
       prevLogTerm: 1,
-      entries: #[],
+      entries: [],
       leaderCommit: 1
     }
   ]);

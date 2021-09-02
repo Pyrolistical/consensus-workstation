@@ -1,6 +1,6 @@
 import * as R from 'ramda';
 
-import {Node, RequestVoteRequest, Event} from './types';
+import { Node, RequestVoteRequest, Event } from './types';
 
 export default (node: Node, event: RequestVoteRequest): Event[] => {
   const longerLog = R.path([event.lastLogIndex, 'term'], node.state.log) >= event.lastLogTerm && node.state.log.length - 1 > event.lastLogIndex;
@@ -8,19 +8,19 @@ export default (node: Node, event: RequestVoteRequest): Event[] => {
   if (node.state.currentTerm > event.term || longerLog || alreadyVoted) {
     const result: Event[] = [];
     if (node.state.currentTerm < event.term) {
-      result.push(#{
+      result.push({
         type: 'SaveNodeState',
         source: node.id,
-        state: #{
+        state: {
           ...node.state,
           currentTerm: event.term,
           votedFor: null
         }
       });
     }
-    return #[
+    return [
       ...result,
-      #{
+      {
         type: 'RequestVoteResponse',
         source: node.id,
         destination: event.source,
@@ -30,17 +30,17 @@ export default (node: Node, event: RequestVoteRequest): Event[] => {
       }
     ];
   }
-  return #[
-    #{
+  return [
+    {
       type: 'SaveNodeState',
       source: node.id,
-      state: #{
+      state: {
         ...node.state,
         currentTerm: event.term,
         votedFor: event.source
       }
     },
-    #{
+    {
       type: 'RequestVoteResponse',
       source: node.id,
       destination: event.source,

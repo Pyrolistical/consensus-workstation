@@ -1,30 +1,30 @@
 import next from './AppendEntriesRequest'
 
 test('followers response success if append entries request passes consistency check', () => {
-  const node = #{
+  const node = {
     id: 'follower',
     mode: 'follower' as const,
     leaderId: 'leader',
-    configuration: #{
-      peers: #['leader', 'follower', 'another follower']
+    configuration: {
+      peers: ['leader', 'follower', 'another follower']
     },
-    state: #{
+    state: {
       currentTerm: 1,
       votedFor: 'leader',
-      log: #[
-        #{
+      log: [
+        {
           term: 1,
           command: ''
         }
       ]
     },
-    volatileState: #{
+    volatileState: {
       commitIndex: 0,
       lastApplied: 0
     }
   };
 
-  const events = next(node, #{
+  const events = next(node, {
     type: 'AppendEntriesRequest',
     clientId: 'client',
     source: 'leader',
@@ -33,8 +33,8 @@ test('followers response success if append entries request passes consistency ch
     leaderId: 'leader',
     prevLogIndex: 0,
     prevLogTerm: 1,
-    entries: #[
-      #{
+    entries: [
+      {
         term: 1,
         command: 'do thing'
       }
@@ -42,36 +42,36 @@ test('followers response success if append entries request passes consistency ch
     leaderCommit: 0
   });
 
-  expect(events).toEqual(#[
-    #{
+  expect(events).toEqual([
+    {
       type: 'SaveNodeState',
       source: 'follower',
-      state: #{
+      state: {
         currentTerm: 1,
         votedFor: 'leader',
-        log: #[
-          #{
+        log: [
+          {
             term: 1,
             command: ''
           },
-          #{
+          {
             term: 1,
             command: 'do thing'
           }
         ]
       }
     },
-    #{
+    {
       type: 'ElectionTimerReset',
       source: 'follower'
     },
-    #{
+    {
       type: 'AppendEntriesResponse',
       source: 'follower',
       destination: 'leader',
       term: 1,
       success: true,
-      request: #{
+      request: {
         type: 'AppendEntriesRequest',
         clientId: 'client',
         source: 'leader',
@@ -80,8 +80,8 @@ test('followers response success if append entries request passes consistency ch
         leaderId: 'leader',
         prevLogIndex: 0,
         prevLogTerm: 1,
-        entries: #[
-          #{
+        entries: [
+          {
             term: 1,
             command: 'do thing'
           }
@@ -93,34 +93,34 @@ test('followers response success if append entries request passes consistency ch
 });
 
 test('followers update their commitIndex with the leaderCommit', () => {
-  const node = #{
+  const node = {
     id: 'follower',
     mode: 'follower' as const,
     leaderId: 'leader',
-    configuration: #{
-      peers: #['leader', 'follower', 'another follower']
+    configuration: {
+      peers: ['leader', 'follower', 'another follower']
     },
-    state: #{
+    state: {
       currentTerm: 1,
       votedFor: 'leader',
-      log: #[
-        #{
+      log: [
+        {
           term: 1,
           command: ''
         },
-        #{
+        {
           term: 1,
           command: 'do thing'
         }
       ]
     },
-    volatileState: #{
+    volatileState: {
       commitIndex: 0,
       lastApplied: 0
     }
   };
 
-  const events = next(node, #{
+  const events = next(node, {
     type: 'AppendEntriesRequest',
     clientId: 'client',
     source: 'leader',
@@ -129,30 +129,30 @@ test('followers update their commitIndex with the leaderCommit', () => {
     leaderId: 'leader',
     prevLogIndex: 1,
     prevLogTerm: 1,
-    entries: #[],
+    entries: [],
     leaderCommit: 1
   });
 
-  expect(events).toEqual(#[
-    #{
+  expect(events).toEqual([
+    {
       type: 'SaveVolatileState',
       source: 'follower',
-      volatileState: #{
+      volatileState: {
         commitIndex: 1,
         lastApplied: 0
       }
     },
-    #{
+    {
       type: 'ElectionTimerReset',
       source: 'follower'
     },
-    #{
+    {
       type: 'AppendEntriesResponse',
       source: 'follower',
       destination: 'leader',
       term: 1,
       success: true,
-      request: #{
+      request: {
         type: 'AppendEntriesRequest',
         clientId: 'client',
         source: 'leader',
@@ -161,7 +161,7 @@ test('followers update their commitIndex with the leaderCommit', () => {
         leaderId: 'leader',
         prevLogIndex: 1,
         prevLogTerm: 1,
-        entries: #[],
+        entries: [],
         leaderCommit: 1
       }
     }
@@ -169,43 +169,43 @@ test('followers update their commitIndex with the leaderCommit', () => {
 })
 
 test('superseeded leaders convert to followers when they see a higher term', () => {
-  const node = #{
+  const node = {
     id: 'previous leader',
     mode: 'leader' as const,
-    configuration: #{
-      peers: #['leader', 'follower', 'previous leader']
+    configuration: {
+      peers: ['leader', 'follower', 'previous leader']
     },
-    state: #{
+    state: {
       currentTerm: 1,
       votedFor: 'previous leader',
-      log: #[
-        #{
+      log: [
+        {
           term: 1,
           command: ''
         },
-        #{
+        {
           term: 1,
           command: 'do thing'
         }
       ]
     },
-    volatileState: #{
+    volatileState: {
       commitIndex: 1,
       lastApplied: 1
     },
-    volatileLeaderState: #{
-      nextIndex: #{
+    volatileLeaderState: {
+      nextIndex: {
         follower: 2,
         'leader': 2
       },
-      matchIndex: #{
+      matchIndex: {
         follower: 1,
         'leader': 1
       }
     }
   };
 
-  const events = next(node, #{
+  const events = next(node, {
     type: 'AppendEntriesRequest',
     clientId: 'client',
     source: 'leader',
@@ -214,46 +214,46 @@ test('superseeded leaders convert to followers when they see a higher term', () 
     leaderId: 'leader',
     prevLogIndex: 1,
     prevLogTerm: 1,
-    entries: #[],
+    entries: [],
     leaderCommit: 1
   });
 
-  expect(events).toEqual(#[
-    #{
+  expect(events).toEqual([
+    {
       type: 'ChangeMode',
       source: 'previous leader',
       mode: 'follower',
       leaderId: 'leader'
     },
-    #{
+    {
       type: 'SaveNodeState',
       source: 'previous leader',
-      state: #{
+      state: {
         currentTerm: 2,
         votedFor: 'previous leader',
-        log: #[
-          #{
+        log: [
+          {
             term: 1,
             command: ''
           },
-          #{
+          {
             term: 1,
             command: 'do thing'
           }
         ]
       }
     },
-    #{
+    {
       type: 'ElectionTimerReset',
       source: 'previous leader'
     },
-    #{
+    {
       type: 'AppendEntriesResponse',
       source: 'previous leader',
       destination: 'leader',
       term: 2,
       success: true,
-      request: #{
+      request: {
         type: 'AppendEntriesRequest',
         clientId: 'client',
         source: 'leader',
@@ -262,7 +262,7 @@ test('superseeded leaders convert to followers when they see a higher term', () 
         leaderId: 'leader',
         prevLogIndex: 1,
         prevLogTerm: 1,
-        entries: #[],
+        entries: [],
         leaderCommit: 1
       }
     }

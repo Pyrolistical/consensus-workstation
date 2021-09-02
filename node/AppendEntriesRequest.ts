@@ -1,11 +1,11 @@
 import * as R from 'ramda';
 
-import {Node, AppendEntriesRequest, Event} from './types';
+import { Node, AppendEntriesRequest, Event } from './types';
 
 export default (node: Node, event: AppendEntriesRequest): Event[] => {
   if (event.term < node.state.currentTerm) {
-    return #[
-      #{
+    return [
+      {
         type: 'AppendEntriesResponse',
         destination: event.source,
         source: node.id,
@@ -22,43 +22,43 @@ export default (node: Node, event: AppendEntriesRequest): Event[] => {
     const result: Event[] = [];
     if (descended) {
       result.push(
-        #{
+        {
           type: 'ChangeMode',
           source: node.id,
           mode: 'follower',
           leaderId: event.source
         },
-        #{
+        {
           type: 'SaveNodeState',
           source: node.id,
-          state: #{
+          state: {
             ...node.state,
             currentTerm: event.term,
-            log: #[
+            log: [
               ...R.drop(event.prevLogIndex, node.state.log)
             ]
           }
         }
       );
     } else {
-      result.push(#{
+      result.push({
         type: 'SaveNodeState',
         source: node.id,
-        state: #{
+        state: {
           ...node.state,
-          log: #[
+          log: [
             ...R.drop(event.prevLogIndex, node.state.log)
           ]
         }
       });
     }
-    return #[
+    return [
       ...result,
-      #{
+      {
         type: 'ElectionTimerReset',
         source: node.id
       },
-      #{
+      {
         type: 'AppendEntriesResponse',
         source: node.id,
         destination: event.source,
@@ -71,65 +71,65 @@ export default (node: Node, event: AppendEntriesRequest): Event[] => {
 
   const result: Event[] = [];
   if (event.leaderCommit > node.volatileState.commitIndex) {
-    result.push(#{
+    result.push({
       type: 'SaveVolatileState',
       source: node.id,
-      volatileState: #{
+      volatileState: {
         ...node.volatileState,
         commitIndex: event.leaderCommit
       }
     });
   }
   if (descended) {
-    result.push(#{
+    result.push({
       type: 'ChangeMode',
       source: node.id,
       mode: 'follower',
       leaderId: event.source
     });
     if (event.entries.length > 0) {
-      result.push(#{
+      result.push({
         type: 'SaveNodeState',
         source: node.id,
-        state: #{
+        state: {
           ...node.state,
           currentTerm: event.term,
-          log: #[
+          log: [
             ...node.state.log,
             ...event.entries
           ]
         }
       });
     } else {
-      result.push(#{
+      result.push({
         type: 'SaveNodeState',
         source: node.id,
-        state: #{
+        state: {
           ...node.state,
           currentTerm: event.term
         }
       });
     }
   } else if (event.entries.length > 0) {
-    result.push(#{
+    result.push({
       type: 'SaveNodeState',
       source: node.id,
-      state: #{
+      state: {
         ...node.state,
-        log: #[
+        log: [
           ...node.state.log,
           ...event.entries
         ]
       }
     });
   }
-  return #[
+  return [
     ...result,
-    #{
+    {
       type: 'ElectionTimerReset',
       source: node.id
     },
-    #{
+    {
       type: 'AppendEntriesResponse',
       source: node.id,
       destination: event.source,

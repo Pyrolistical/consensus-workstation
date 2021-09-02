@@ -1,11 +1,11 @@
 import * as R from 'ramda';
 
-import {Node, ClientCommandsRequest, Event} from './types';
+import { Node, ClientCommandsRequest, Event } from './types';
 
 export default (node: Node, event: ClientCommandsRequest): Event[] => {
   if (node.mode === 'follower') {
-    return #[
-      #{
+    return [
+      {
         type: 'ClientCommandsResponse',
         destination: event.source,
         source: node.id,
@@ -15,19 +15,17 @@ export default (node: Node, event: ClientCommandsRequest): Event[] => {
     ];
   }
 
-  const entries = #[
-    ...event.commands.map((command) => #{
-      term: node.state.currentTerm,
-      command
-    })
-  ];
-  return #[
-    #{
+  const entries = event.commands.map((command) => ({
+    term: node.state.currentTerm,
+    command
+  }));
+  return [
+    {
       type: 'SaveNodeState',
       source: node.id,
-      state: #{
+      state: {
         ...node.state,
-        log: #[
+        log: [
           ...node.state.log,
           ...entries
         ]
@@ -35,7 +33,7 @@ export default (node: Node, event: ClientCommandsRequest): Event[] => {
     },
     ...R.pipe(
       R.reject(R.equals(node.id)),
-      R.map((peer) => #{
+      R.map((peer) => ({
         type: 'AppendEntriesRequest',
         clientId: event.source,
         source: node.id,
@@ -46,7 +44,7 @@ export default (node: Node, event: ClientCommandsRequest): Event[] => {
         prevLogTerm: node.state.log[node.state.log.length - 1].term,
         entries,
         leaderCommit: node.volatileState.commitIndex
-      })
+      }))
     )(node.configuration.peers)
   ];
 };

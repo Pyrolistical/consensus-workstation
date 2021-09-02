@@ -1,5 +1,5 @@
 import * as R from 'ramda';
-import {LeaderNode, AppendEntriesResponse, Event} from './types';
+import { LeaderNode, AppendEntriesResponse, Event } from './types';
 
 export const calculateMajorityMatchIndex = (majorityThreshold, leaderIndex, matchIndex) => {
   const indices = Object.values(matchIndex);
@@ -14,23 +14,23 @@ export const calculateMajorityMatchIndex = (majorityThreshold, leaderIndex, matc
 
 export default (node: LeaderNode, event: AppendEntriesResponse): Event[] => {
   if (event.success) {
-    const updatedMatchIndex = #{
+    const updatedMatchIndex = {
       ...node.volatileLeaderState.matchIndex,
       [event.source]: event.request.prevLogIndex + event.request.entries.length
     };
     const majorityMatchIndex = calculateMajorityMatchIndex(node.configuration.peers.length / 2, node.state.log.length - 1, updatedMatchIndex);
     const result: Event[] = [];
     if (majorityMatchIndex > node.volatileState.commitIndex) {
-      result.push(#{
+      result.push({
         type: 'SaveVolatileState',
         source: node.id,
-        volatileState: #{
+        volatileState: {
           ...node.volatileState,
           commitIndex: majorityMatchIndex
         }
       });
       if (event.request.clientId) {
-        result.push(#{
+        result.push({
           type: 'ClientCommandsResponse',
           destination: event.request.clientId,
           source: node.id,
@@ -38,12 +38,12 @@ export default (node: LeaderNode, event: AppendEntriesResponse): Event[] => {
         });
       }
     }
-    return #[
-      #{
+    return [
+      {
         type: 'SaveVolatileLeaderState',
         source: 'leader',
-        volatileLeaderState: #{
-          nextIndex: #{
+        volatileLeaderState: {
+          nextIndex: {
             ...node.volatileLeaderState.nextIndex,
             [event.source]: event.request.prevLogIndex + event.request.entries.length + 1
           },
@@ -53,13 +53,13 @@ export default (node: LeaderNode, event: AppendEntriesResponse): Event[] => {
       ...result
     ];
   } else {
-    return #[
-      #{
+    return [
+      {
         type: 'SaveVolatileLeaderState',
         source: 'leader',
-        volatileLeaderState: #{
+        volatileLeaderState: {
           ...node.volatileLeaderState,
-          nextIndex: #{
+          nextIndex: {
             ...node.volatileLeaderState.nextIndex,
             [event.source]: node.volatileLeaderState.nextIndex[event.source] - 1
           }

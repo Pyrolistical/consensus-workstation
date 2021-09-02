@@ -1,30 +1,30 @@
 import next from './RequestVoteRequest'
 
 test('node rejects vote if own term is higher', () => {
-   const node = #{
+  const node = {
     id: 'follower',
     mode: 'follower' as const,
     leaderId: 'leader',
-    configuration: #{
-      peers: #['leader', 'follower', 'another node']
+    configuration: {
+      peers: ['leader', 'follower', 'another node']
     },
-    state: #{
+    state: {
       currentTerm: 3,
       votedFor: 'leader',
-      log: #[
-        #{
+      log: [
+        {
           term: 1,
           command: ''
         }
       ]
     },
-    volatileState: #{
+    volatileState: {
       commitIndex: 0,
       lastApplied: 0
     }
   };
 
-  const events = next(node, #{
+  const events = next(node, {
     type: 'RequestVoteRequest',
     source: 'another node',
     destination: 'follower',
@@ -34,14 +34,14 @@ test('node rejects vote if own term is higher', () => {
     lastLogTerm: 1
   });
 
-  expect(events).toEqual(#[
-    #{
+  expect(events).toEqual([
+    {
       type: 'RequestVoteResponse',
       source: 'follower',
       destination: 'another node',
       term: 3,
       voteGranted: false,
-      request: #{
+      request: {
         type: 'RequestVoteRequest',
         source: 'another node',
         destination: 'follower',
@@ -55,38 +55,38 @@ test('node rejects vote if own term is higher', () => {
 });
 
 test('node rejects vote if own log is longer', () => {
-  const node = #{
+  const node = {
     id: 'follower',
     mode: 'follower' as const,
     leaderId: 'leader',
-    configuration: #{
-      peers: #['leader', 'follower', 'another node']
+    configuration: {
+      peers: ['leader', 'follower', 'another node']
     },
-    state: #{
+    state: {
       currentTerm: 2,
       votedFor: 'leader',
-      log: #[
-        #{
+      log: [
+        {
           term: 1,
           command: ''
         },
-        #{
+        {
           term: 2,
           command: ''
         },
-        #{
+        {
           term: 2,
           command: ''
         }
       ]
     },
-    volatileState: #{
+    volatileState: {
       commitIndex: 0,
       lastApplied: 0
     }
   };
 
-  const events = next(node, #{
+  const events = next(node, {
     type: 'RequestVoteRequest',
     source: 'another node',
     destination: 'follower',
@@ -96,36 +96,36 @@ test('node rejects vote if own log is longer', () => {
     lastLogTerm: 2
   });
 
-  expect(events).toEqual(#[
-    #{
+  expect(events).toEqual([
+    {
       type: 'SaveNodeState',
       source: 'follower',
-      state: #{
+      state: {
         currentTerm: 3,
         votedFor: null,
-        log: #[
-          #{
+        log: [
+          {
             term: 1,
             command: ''
           },
-          #{
+          {
             term: 2,
             command: ''
           },
-          #{
+          {
             term: 2,
             command: ''
           }
         ]
       }
     },
-    #{
+    {
       type: 'RequestVoteResponse',
       source: 'follower',
       destination: 'another node',
       term: 3,
       voteGranted: false,
-      request: #{
+      request: {
         type: 'RequestVoteRequest',
         source: 'another node',
         destination: 'follower',
@@ -139,38 +139,38 @@ test('node rejects vote if own log is longer', () => {
 });
 
 test('node rejects vote if already voted for somebody else in current term', () => {
-  const node = #{
+  const node = {
     id: 'follower',
     mode: 'follower' as const,
     leaderId: 'leader',
-    configuration: #{
-      peers: #['leader', 'follower', 'another node']
+    configuration: {
+      peers: ['leader', 'follower', 'another node']
     },
-    state: #{
+    state: {
       currentTerm: 3,
       votedFor: 'leader',
-      log: #[
-        #{
+      log: [
+        {
           term: 1,
           command: ''
         },
-        #{
+        {
           term: 2,
           command: ''
         },
-        #{
+        {
           term: 2,
           command: ''
         }
       ]
     },
-    volatileState: #{
+    volatileState: {
       commitIndex: 0,
       lastApplied: 0
     }
   };
 
-  const events = next(node, #{
+  const events = next(node, {
     type: 'RequestVoteRequest',
     source: 'another node',
     destination: 'follower',
@@ -180,14 +180,14 @@ test('node rejects vote if already voted for somebody else in current term', () 
     lastLogTerm: 2
   });
 
-  expect(events).toEqual(#[
-    #{
+  expect(events).toEqual([
+    {
       type: 'RequestVoteResponse',
       source: 'follower',
       destination: 'another node',
       term: 3,
       voteGranted: false,
-      request: #{
+      request: {
         type: 'RequestVoteRequest',
         source: 'another node',
         destination: 'follower',
@@ -202,34 +202,34 @@ test('node rejects vote if already voted for somebody else in current term', () 
 
 
 test('grant vote of candidate log is as long as own', () => {
-  const node = #{
+  const node = {
     id: 'follower',
     mode: 'follower' as const,
     leaderId: 'leader',
-    configuration: #{
-      peers: #['leader', 'follower', 'another node']
+    configuration: {
+      peers: ['leader', 'follower', 'another node']
     },
-    state: #{
+    state: {
       currentTerm: 2,
       votedFor: 'leader',
-      log: #[
-        #{
+      log: [
+        {
           term: 1,
           command: ''
         },
-        #{
+        {
           term: 2,
           command: ''
         }
       ]
     },
-    volatileState: #{
+    volatileState: {
       commitIndex: 0,
       lastApplied: 0
     }
   };
 
-  const events = next(node, #{
+  const events = next(node, {
     type: 'RequestVoteRequest',
     source: 'another node',
     destination: 'follower',
@@ -239,32 +239,32 @@ test('grant vote of candidate log is as long as own', () => {
     lastLogTerm: 2
   });
 
-  expect(events).toEqual(#[
-    #{
+  expect(events).toEqual([
+    {
       type: 'SaveNodeState',
       source: 'follower',
-      state: #{
+      state: {
         currentTerm: 3,
         votedFor: 'another node',
-        log: #[
-          #{
+        log: [
+          {
             term: 1,
             command: ''
           },
-          #{
+          {
             term: 2,
             command: ''
           }
         ]
       }
     },
-    #{
+    {
       type: 'RequestVoteResponse',
       source: 'follower',
       destination: 'another node',
       term: 3,
       voteGranted: true,
-      request: #{
+      request: {
         type: 'RequestVoteRequest',
         source: 'another node',
         destination: 'follower',
