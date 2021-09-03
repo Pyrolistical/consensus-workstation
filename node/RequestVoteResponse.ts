@@ -8,7 +8,7 @@ export default (node: CandidateNode, event: RequestVoteResponse): Event[] => {
     ...node.voteResults,
     [event.source]: event.voteGranted
   };
-  if (Object.values(voteResults).filter(R.identity).length > majorityThreshold) {
+  if (Object.values(voteResults).filter((x) => x).length > majorityThreshold) {
     return [
       {
         type: 'ChangeMode',

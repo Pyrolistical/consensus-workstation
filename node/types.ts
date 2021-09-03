@@ -129,7 +129,7 @@ export type VolatileLeaderState = {
 };
 
 export type VoteResults = {
-  [node: NodeId]: boolean;
+  [node: string]: boolean;
 };
 
 export interface ChangeMode {

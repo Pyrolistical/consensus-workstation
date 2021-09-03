@@ -30,9 +30,9 @@ export default (node: Node, event: ElectionTimerEnded): Event[] => {
           lastLogTerm
         };
       })
-    )(node.configuration.peers),
+    )(node.configuration.peers) as Event[],
     {
-      type: 'ElectionTimerStarted',
+      type: 'ElectionTimerReset',
       source: node.id
     }
   ];
