@@ -45,6 +45,10 @@ export default (node: Node, event: ClientCommandsRequest): Event[] => {
         entries,
         leaderCommit: node.volatileState.commitIndex
       }))
-    )(node.configuration.peers)
+    )(node.configuration.peers) as Event[],
+    {
+      type: 'EmptyAppendEntriesTimerRestart',
+      source: node.id
+    }
   ];
 };

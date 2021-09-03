@@ -68,7 +68,7 @@ test('election started after leader fails', () => {
       lastLogTerm: 1
     },
     {
-      type: 'ElectionTimerReset',
+      type: 'ElectionTimerRestart',
       source: 'B'
     }
   ]);

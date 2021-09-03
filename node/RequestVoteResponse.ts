@@ -48,7 +48,11 @@ export default (node: CandidateNode, event: RequestVoteResponse): Event[] => {
           entries: [],
           leaderCommit: node.volatileState.commitIndex
         }))
-      )(node.configuration.peers) as Event[]
+      )(node.configuration.peers) as Event[],
+      {
+        type: 'EmptyAppendEntriesTimerRestart',
+        source: node.id
+      }
     ];
   } else {
     return [

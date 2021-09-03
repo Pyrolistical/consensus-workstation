@@ -92,6 +92,10 @@ test('client request are distributed from leader to peers', () => {
         }
       ],
       leaderCommit: 0
+    },
+    {
+      type: 'EmptyAppendEntriesTimerRestart',
+      source: 'leader'
     }
   ]);
 });

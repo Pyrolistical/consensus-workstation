@@ -32,7 +32,7 @@ export default (node: Node, event: ElectionTimerEnded): Event[] => {
       })
     )(node.configuration.peers) as Event[],
     {
-      type: 'ElectionTimerReset',
+      type: 'ElectionTimerRestart',
       source: node.id
     }
   ];

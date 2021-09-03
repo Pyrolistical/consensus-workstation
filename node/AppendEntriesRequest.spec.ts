@@ -62,7 +62,7 @@ test('followers response success if append entries request passes consistency ch
       }
     },
     {
-      type: 'ElectionTimerReset',
+      type: 'ElectionTimerRestart',
       source: 'follower'
     },
     {
@@ -143,7 +143,7 @@ test('followers update their commitIndex with the leaderCommit', () => {
       }
     },
     {
-      type: 'ElectionTimerReset',
+      type: 'ElectionTimerRestart',
       source: 'follower'
     },
     {
@@ -244,7 +244,11 @@ test('superseeded leaders convert to followers when they see a higher term', () 
       }
     },
     {
-      type: 'ElectionTimerReset',
+      type: 'EmptyAppendEntriesTimerCancel',
+      source: 'previous leader'
+    },
+    {
+      type: 'ElectionTimerRestart',
       source: 'previous leader'
     },
     {

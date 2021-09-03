@@ -36,6 +36,10 @@ export default (node: Node, event: AppendEntriesRequest): Event[] => {
             currentTerm: event.term,
             log: R.drop(event.prevLogIndex, node.state.log)
           }
+        },
+        {
+          type: 'EmptyAppendEntriesTimerCancel',
+          source: node.id
         }
       );
     } else {
@@ -51,7 +55,7 @@ export default (node: Node, event: AppendEntriesRequest): Event[] => {
     return [
       ...result,
       {
-        type: 'ElectionTimerReset',
+        type: 'ElectionTimerRestart',
         source: node.id
       },
       {
@@ -106,6 +110,10 @@ export default (node: Node, event: AppendEntriesRequest): Event[] => {
         }
       });
     }
+    result.push({
+      type: 'EmptyAppendEntriesTimerCancel',
+      source: node.id
+    })
   } else if (event.entries.length > 0) {
     result.push({
       type: 'SaveNodeState',
@@ -122,7 +130,7 @@ export default (node: Node, event: AppendEntriesRequest): Event[] => {
   return [
     ...result,
     {
-      type: 'ElectionTimerReset',
+      type: 'ElectionTimerRestart',
       source: node.id
     },
     {

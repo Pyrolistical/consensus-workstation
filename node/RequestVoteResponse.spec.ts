@@ -139,6 +139,10 @@ test('become the leader if received majority votes', () => {
       prevLogTerm: 1,
       entries: [],
       leaderCommit: 1
+    },
+    {
+      type: 'EmptyAppendEntriesTimerRestart',
+      source: 'A'
     }
   ]);
 });
