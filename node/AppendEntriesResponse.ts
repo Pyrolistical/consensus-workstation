@@ -21,21 +21,25 @@ export default (node: LeaderNode, event: AppendEntriesResponse): Event[] => {
     const majorityMatchIndex = calculateMajorityMatchIndex(node.configuration.peers.length / 2, node.state.log.length - 1, updatedMatchIndex);
     const result: Event[] = [];
     if (majorityMatchIndex > node.volatileState.commitIndex) {
-      result.push({
-        type: 'SaveVolatileState',
-        source: node.id,
-        volatileState: {
-          ...node.volatileState,
-          commitIndex: majorityMatchIndex
-        }
-      });
-      if (event.request.clientId) {
-        result.push({
-          type: 'ClientCommandsResponse',
-          destination: event.request.clientId,
+      result.push(
+        {
+          type: 'SaveVolatileState',
           source: node.id,
-          success: true
-        });
+          volatileState: {
+            ...node.volatileState,
+            commitIndex: majorityMatchIndex
+          }
+        }
+      );
+      if (event.request.clientId) {
+        result.push(
+          {
+            type: 'ClientCommandsResponse',
+            destination: event.request.clientId,
+            source: node.id,
+            success: true
+          }
+        );
       }
     }
     return [

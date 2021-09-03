@@ -17,8 +17,8 @@ export default (node: Node, event: AppendEntriesRequest): Event[] => {
   }
   const descended = node.mode !== 'follower' && event.term > node.state.currentTerm;
 
-  const conflict = R.path([event.prevLogIndex, 'term'], node.state.log) !== event.prevLogTerm;
-  if (conflict) {
+  const sharesCommonLog = R.path([event.prevLogIndex, 'term'], node.state.log) === event.prevLogTerm;
+  if (!sharesCommonLog) {
     const result: Event[] = [];
     if (descended) {
       result.push(
@@ -29,28 +29,31 @@ export default (node: Node, event: AppendEntriesRequest): Event[] => {
           leaderId: event.source
         },
         {
+          type: 'EmptyAppendEntriesTimerCancel',
+          source: node.id
+        },
+        {
           type: 'SaveNodeState',
           source: node.id,
           state: {
             ...node.state,
             currentTerm: event.term,
-            log: R.drop(event.prevLogIndex, node.state.log)
+            log: R.take(event.prevLogIndex, node.state.log)
           }
-        },
-        {
-          type: 'EmptyAppendEntriesTimerCancel',
-          source: node.id
         }
       );
     } else {
-      result.push({
-        type: 'SaveNodeState',
-        source: node.id,
-        state: {
-          ...node.state,
-          log: R.drop(event.prevLogIndex, node.state.log)
+      result.push(
+        {
+          type: 'SaveNodeState',
+          source: node.id,
+          state: {
+            ...node.state,
+            currentTerm: event.term,
+            log: R.take(event.prevLogIndex, node.state.log)
+          }
         }
-      });
+      );
     }
     return [
       ...result,
@@ -62,7 +65,7 @@ export default (node: Node, event: AppendEntriesRequest): Event[] => {
         type: 'AppendEntriesResponse',
         source: node.id,
         destination: event.source,
-        term: node.state.currentTerm,
+        term: event.term,
         success: false,
         request: event
       }
@@ -71,24 +74,32 @@ export default (node: Node, event: AppendEntriesRequest): Event[] => {
 
   const result: Event[] = [];
   if (event.leaderCommit > node.volatileState.commitIndex) {
-    result.push({
-      type: 'SaveVolatileState',
-      source: node.id,
-      volatileState: {
-        ...node.volatileState,
-        commitIndex: event.leaderCommit
+    result.push(
+      {
+        type: 'SaveVolatileState',
+        source: node.id,
+        volatileState: {
+          ...node.volatileState,
+          commitIndex: event.leaderCommit
+        }
       }
-    });
+    );
   }
   if (descended) {
-    result.push({
-      type: 'ChangeMode',
-      source: node.id,
-      mode: 'follower',
-      leaderId: event.source
-    });
-    if (event.entries.length > 0) {
-      result.push({
+    result.push(
+      {
+        type: 'ChangeMode',
+        source: node.id,
+        mode: 'follower',
+        leaderId: event.source
+      },
+      {
+        type: 'EmptyAppendEntriesTimerCancel',
+        source: node.id
+      }
+    );
+    result.push(
+      {
         type: 'SaveNodeState',
         source: node.id,
         state: {
@@ -99,33 +110,22 @@ export default (node: Node, event: AppendEntriesRequest): Event[] => {
             ...event.entries
           ]
         }
-      });
-    } else {
-      result.push({
+      }
+    );
+  } else if (event.entries.length > 0) {
+    result.push(
+      {
         type: 'SaveNodeState',
         source: node.id,
         state: {
           ...node.state,
-          currentTerm: event.term
+          log: [
+            ...node.state.log,
+            ...event.entries
+          ]
         }
-      });
-    }
-    result.push({
-      type: 'EmptyAppendEntriesTimerCancel',
-      source: node.id
-    })
-  } else if (event.entries.length > 0) {
-    result.push({
-      type: 'SaveNodeState',
-      source: node.id,
-      state: {
-        ...node.state,
-        log: [
-          ...node.state.log,
-          ...event.entries
-        ]
       }
-    });
+    );
   }
   return [
     ...result,

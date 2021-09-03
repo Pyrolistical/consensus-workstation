@@ -8,15 +8,17 @@ export default (node: Node, event: RequestVoteRequest): Event[] => {
   if (node.state.currentTerm > event.term || longerLog || alreadyVoted) {
     const result: Event[] = [];
     if (node.state.currentTerm < event.term) {
-      result.push({
-        type: 'SaveNodeState',
-        source: node.id,
-        state: {
-          ...node.state,
-          currentTerm: event.term,
-          votedFor: null
+      result.push(
+        {
+          type: 'SaveNodeState',
+          source: node.id,
+          state: {
+            ...node.state,
+            currentTerm: event.term,
+            votedFor: null
+          }
         }
-      });
+      );
     }
     return [
       ...result,
