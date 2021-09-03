@@ -32,7 +32,7 @@ export default (node: Node, event: ClientCommandsRequest): Event[] => {
       }
     },
     ...R.pipe(
-      R.reject(R.equals(node.id)),
+      R.reject<string, 'array'>(R.equals(node.id)),
       R.map((peer) => ({
         type: 'AppendEntriesRequest',
         clientId: event.source,

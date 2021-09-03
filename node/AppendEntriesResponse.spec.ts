@@ -1,4 +1,5 @@
 import next, { calculateMajorityMatchIndex } from './AppendEntriesResponse';
+import { Index } from './types';
 
 test('leader updates nextIndex and matchIndex on successful AppendEntries', () => {
   const node = {
@@ -188,6 +189,6 @@ describe('calculateMajorityMatchIndex', () => {
     { majorityThreshold: 1.5, leaderIndex: 1, matchIndex: { f1: 1, f2: 0 }, expectedMajority: 1 },
     { majorityThreshold: 2.5, leaderIndex: 3, matchIndex: { f1: 3, f2: 2, f3: 1, f4: 1 }, expectedMajority: 2 }
   ])('leaderIndex $leaderIndex & $matchIndex should have majority of $expectedMajority', ({ majorityThreshold, leaderIndex, matchIndex, expectedMajority }) => {
-    expect(calculateMajorityMatchIndex(majorityThreshold, leaderIndex, matchIndex)).toBe(expectedMajority);
+    expect(calculateMajorityMatchIndex(majorityThreshold, leaderIndex, matchIndex as Index)).toBe(expectedMajority);
   })
 })

@@ -3,6 +3,7 @@
     "module": "esnext",
     "target": "esnext",
     "moduleResolution": "node",
-    "strictNullChecks": true
+    "strictNullChecks": true,
+    "noImplicitAny": true
   }
 }

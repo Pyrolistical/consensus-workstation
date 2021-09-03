@@ -1,11 +1,18 @@
 import * as R from 'ramda';
-import { LeaderNode, AppendEntriesResponse, Event } from './types';
+import { LeaderNode, AppendEntriesResponse, Event, Index } from './types';
 
-export const calculateMajorityMatchIndex = (majorityThreshold, leaderIndex, matchIndex) => {
+function countLessThanOrEqualTo(i: number, array: number[]): number {
+  return R.pipe(
+    R.filter<number, 'array'>(R.lte(i)),
+    R.length
+  )(array);
+};
+
+export const calculateMajorityMatchIndex = (majorityThreshold: number, leaderIndex: number, matchIndex: Index) => {
   const indices = Object.values(matchIndex);
   for (let i = leaderIndex; i >= 0; i--) {
-    const count = R.filter(R.lte(i))(indices);
-    if (1 + count.length >= majorityThreshold) {
+    const count = countLessThanOrEqualTo(i, indices);
+    if (1 + count >= majorityThreshold) {
       return i;
     }
   }

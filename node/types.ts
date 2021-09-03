@@ -129,13 +129,13 @@ export type VolatileState = {
   commitIndex: number;
   lastApplied: number;
 };
+
+export type Index = {
+  [nodeId: string]: number;
+};
 export type VolatileLeaderState = {
-  nextIndex: {
-    [nodeId: string]: number;
-  };
-  matchIndex: {
-    [nodeId: string]: number;
-  };
+  nextIndex: Index;
+  matchIndex: Index;
 };
 
 export type VoteResults = {

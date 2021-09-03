@@ -4,7 +4,7 @@ import { Node, EmptyAppendEntriesTimerEnded, Event } from './types';
 export default (node: Node, event: EmptyAppendEntriesTimerEnded): Event[] => {
   return [
     ...R.pipe(
-      R.reject(R.equals(node.id)),
+      R.reject<string, 'array'>(R.equals(node.id)),
       R.map((peer) => ({
         type: 'AppendEntriesRequest',
         source: node.id,

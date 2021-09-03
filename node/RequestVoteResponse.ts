@@ -19,24 +19,20 @@ export default (node: CandidateNode, event: RequestVoteResponse): Event[] => {
         type: 'SaveVolatileLeaderState',
         source: 'A',
         volatileLeaderState: {
-          nextIndex: {
-            ...R.pipe(
-              R.reject(R.equals(node.id)),
-              R.map((peer) => [peer, node.state.log.length]),
-              R.fromPairs()
-            )(node.configuration.peers)
-          },
-          matchIndex: {
-            ...R.pipe(
-              R.reject(R.equals(node.id)),
-              R.map((peer) => [peer, node.state.log.length - 1]),
-              R.fromPairs()
-            )(node.configuration.peers)
-          }
+          nextIndex: R.pipe(
+            R.reject<string, 'array'>(R.equals(node.id)),
+            R.map<string, [string, number]>((peer) => [peer, node.state.log.length]),
+            R.fromPairs
+          )(node.configuration.peers),
+          matchIndex: R.pipe(
+            R.reject<string, 'array'>(R.equals(node.id)),
+            R.map<string, [string, number]>((peer) => [peer, node.state.log.length - 1]),
+            R.fromPairs
+          )(node.configuration.peers)
         }
       },
       ...R.pipe(
-        R.reject(R.equals(node.id)),
+        R.reject<string, 'array'>(R.equals(node.id)),
         R.map((peer) => ({
           type: 'AppendEntriesRequest',
           source: node.id,

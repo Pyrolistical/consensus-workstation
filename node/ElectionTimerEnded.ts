@@ -17,9 +17,9 @@ export default (node: Node, event: ElectionTimerEnded): Event[] => {
       }
     },
     ...R.pipe(
-      R.reject(R.equals(node.id)),
+      R.reject<string, 'array'>(R.equals(node.id)),
       R.map(nodeId => {
-        const { term: lastLogTerm } = R.last(node.state.log);
+        const { term: lastLogTerm = 1 } = R.last(node.state.log) || {};
         return {
           type: 'RequestVotesRequest',
           source: node.id,
