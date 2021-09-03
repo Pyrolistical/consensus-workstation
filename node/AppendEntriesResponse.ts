@@ -28,6 +28,21 @@ export default (node: LeaderNode, event: AppendEntriesResponse): Event[] => {
     };
     const majorityMatchIndex = calculateMajorityMatchIndex(node.configuration.peers.length / 2, node.state.log.length - 1, updatedMatchIndex);
     const result: Event[] = [];
+    if (event.request.entries.length > 0) {
+      result.push(
+        {
+          type: 'SaveVolatileLeaderState',
+          source: 'leader',
+          volatileLeaderState: {
+            nextIndex: {
+              ...node.volatileLeaderState.nextIndex,
+              [event.source]: event.request.prevLogIndex + event.request.entries.length + 1
+            },
+            matchIndex: updatedMatchIndex
+          }
+        }
+      );
+    }
     if (majorityMatchIndex > node.volatileState.commitIndex) {
       result.push(
         {
@@ -50,21 +65,10 @@ export default (node: LeaderNode, event: AppendEntriesResponse): Event[] => {
         );
       }
     }
-    return [
-      {
-        type: 'SaveVolatileLeaderState',
-        source: 'leader',
-        volatileLeaderState: {
-          nextIndex: {
-            ...node.volatileLeaderState.nextIndex,
-            [event.source]: event.request.prevLogIndex + event.request.entries.length + 1
-          },
-          matchIndex: updatedMatchIndex
-        }
-      },
-      ...result
-    ];
+    return result;
   } else {
+    const nextIndex = R.pathOr(1, [event.source], node.volatileLeaderState.nextIndex) - 1;
+    const prevLogIndex = nextIndex - 1;
     return [
       {
         type: 'SaveVolatileLeaderState',
@@ -73,9 +77,25 @@ export default (node: LeaderNode, event: AppendEntriesResponse): Event[] => {
           ...node.volatileLeaderState,
           nextIndex: {
             ...node.volatileLeaderState.nextIndex,
-            [event.source]: R.pathOr(1, [event.source], node.volatileLeaderState.nextIndex) - 1
+            [event.source]: nextIndex
           }
         }
+      },
+      {
+        type: 'AppendEntriesRequest',
+        clientId: event.request.clientId,
+        source: node.id,
+        destination: event.source,
+        term: node.state.currentTerm,
+        leaderId: node.id,
+        prevLogIndex,
+        prevLogTerm: R.pathOr(1, [prevLogIndex, 'term'], node.state.log),
+        entries: R.takeLast(node.state.log.length - 1 - prevLogIndex, node.state.log),
+        leaderCommit: node.volatileState.commitIndex
+      },
+      {
+        type: 'EmptyAppendEntriesTimerRestart',
+        source: node.id
       }
     ];
   }

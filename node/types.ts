@@ -25,7 +25,7 @@ export interface ClientCommandsResponse extends NetworkMessage {
 
 export interface AppendEntriesRequest extends NetworkMessage {
   type: "AppendEntriesRequest";
-  clientId?: string;
+  clientId: string | undefined;
   term: number;
   leaderId: NodeId;
   prevLogIndex: number;

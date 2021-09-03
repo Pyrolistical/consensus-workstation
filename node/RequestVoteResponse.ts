@@ -26,7 +26,7 @@ export default (node: CandidateNode, event: RequestVoteResponse): Event[] => {
           )(node.configuration.peers),
           matchIndex: R.pipe(
             R.reject<string, 'array'>(R.equals(node.id)),
-            R.map<string, [string, number]>((peer) => [peer, node.state.log.length - 1]),
+            R.map<string, [string, number]>((peer) => [peer, 0]),
             R.fromPairs
           )(node.configuration.peers)
         }
@@ -40,7 +40,7 @@ export default (node: CandidateNode, event: RequestVoteResponse): Event[] => {
           term: node.state.currentTerm,
           leaderId: node.id,
           prevLogIndex: node.state.log.length - 1,
-          prevLogTerm: R.path([node.state.log.length - 1, 'term'], node.state.log),
+          prevLogTerm: R.pathOr(1, [node.state.log.length - 1, 'term'], node.state.log),
           entries: [],
           leaderCommit: node.volatileState.commitIndex
         }))
