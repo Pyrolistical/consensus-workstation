@@ -3,7 +3,14 @@
     "module": "esnext",
     "target": "esnext",
     "moduleResolution": "node",
-    "strictNullChecks": true,
-    "noImplicitAny": true
+    "alwaysStrict": true,
+    "exactOptionalPropertyTypes": true,
+    "noImplicitAny": true,
+    "noImplicitReturns": true,
+    "noPropertyAccessFromIndexSignature": true,
+    "noUncheckedIndexedAccess": true,
+    "noUnusedLocals": true,
+    "strictFunctionTypes": true,
+    "strictNullChecks": true
   }
 }

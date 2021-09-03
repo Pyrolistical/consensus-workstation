@@ -12,7 +12,7 @@ export default (node: Node, event: EmptyAppendEntriesTimerEnded): Event[] => {
         term: node.state.currentTerm,
         leaderId: node.id,
         prevLogIndex: node.state.log.length - 1,
-        prevLogTerm: node.state.log[node.state.log.length - 1].term,
+        prevLogTerm: R.path([node.state.log.length - 1, 'term'], node.state.log),
         entries: [],
         leaderCommit: node.volatileState.commitIndex
       }))

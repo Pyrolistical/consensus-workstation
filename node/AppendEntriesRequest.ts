@@ -17,7 +17,7 @@ export default (node: Node, event: AppendEntriesRequest): Event[] => {
   }
   const descended = node.mode !== 'follower' && event.term > node.state.currentTerm;
 
-  const sharesCommonLog = R.path([event.prevLogIndex, 'term'], node.state.log) === event.prevLogTerm;
+  const sharesCommonLog = R.pathEq([event.prevLogIndex, 'term'], event.prevLogTerm, node.state.log);
   if (!sharesCommonLog) {
     const result: Event[] = [];
     if (descended) {

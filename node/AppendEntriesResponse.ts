@@ -16,6 +16,7 @@ export const calculateMajorityMatchIndex = (majorityThreshold: number, leaderInd
       return i;
     }
   }
+  /* istanbul ignore next */
   return -1;
 }
 
@@ -72,7 +73,7 @@ export default (node: LeaderNode, event: AppendEntriesResponse): Event[] => {
           ...node.volatileLeaderState,
           nextIndex: {
             ...node.volatileLeaderState.nextIndex,
-            [event.source]: node.volatileLeaderState.nextIndex[event.source] - 1
+            [event.source]: R.pathOr(1, [event.source], node.volatileLeaderState.nextIndex) - 1
           }
         }
       }
