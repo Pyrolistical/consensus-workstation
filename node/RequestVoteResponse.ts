@@ -24,14 +24,14 @@ export default (node: CandidateNode, event: RequestVoteResponse): Event[] => {
               R.reject(R.equals(node.id)),
               R.map((peer) => [peer, node.state.log.length]),
               R.fromPairs()
-            )([...node.configuration.peers])
+            )(node.configuration.peers)
           },
           matchIndex: {
             ...R.pipe(
               R.reject(R.equals(node.id)),
               R.map((peer) => [peer, node.state.log.length - 1]),
               R.fromPairs()
-            )([...node.configuration.peers])
+            )(node.configuration.peers)
           }
         }
       },
@@ -48,7 +48,7 @@ export default (node: CandidateNode, event: RequestVoteResponse): Event[] => {
           entries: [],
           leaderCommit: node.volatileState.commitIndex
         }))
-      )(node.configuration.peers)
+      )(node.configuration.peers) as Event[]
     ];
   } else {
     return [

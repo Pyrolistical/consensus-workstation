@@ -34,9 +34,7 @@ export default (node: Node, event: AppendEntriesRequest): Event[] => {
           state: {
             ...node.state,
             currentTerm: event.term,
-            log: [
-              ...R.drop(event.prevLogIndex, node.state.log)
-            ]
+            log: R.drop(event.prevLogIndex, node.state.log)
           }
         }
       );
@@ -46,9 +44,7 @@ export default (node: Node, event: AppendEntriesRequest): Event[] => {
         source: node.id,
         state: {
           ...node.state,
-          log: [
-            ...R.drop(event.prevLogIndex, node.state.log)
-          ]
+          log: R.drop(event.prevLogIndex, node.state.log)
         }
       });
     }
