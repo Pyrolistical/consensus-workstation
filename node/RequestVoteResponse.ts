@@ -34,7 +34,8 @@ export default (node: CandidateNode, event: RequestVoteResponse): Event[] => {
       ...R.pipe(
         R.reject<string, 'array'>(R.equals(node.id)),
         R.map((peer) => ({
-          type: 'AppendEntriesRequest',
+          type: 'AppendEntriesRequest' as const,
+          clientId: undefined,
           source: node.id,
           destination: peer,
           term: node.state.currentTerm,
@@ -44,7 +45,7 @@ export default (node: CandidateNode, event: RequestVoteResponse): Event[] => {
           entries: [],
           leaderCommit: node.volatileState.commitIndex
         }))
-      )(node.configuration.peers) as Event[],
+      )(node.configuration.peers),
       {
         type: 'EmptyAppendEntriesTimerRestart',
         source: node.id

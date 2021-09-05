@@ -34,7 +34,7 @@ export default (node: Node, event: ClientCommandsRequest): Event[] => {
     ...R.pipe(
       R.reject<string, 'array'>(R.equals(node.id)),
       R.map((peer) => ({
-        type: 'AppendEntriesRequest',
+        type: 'AppendEntriesRequest' as const,
         clientId: event.source,
         source: node.id,
         destination: peer,
@@ -45,7 +45,7 @@ export default (node: Node, event: ClientCommandsRequest): Event[] => {
         entries,
         leaderCommit: node.volatileState.commitIndex
       }))
-    )(node.configuration.peers) as Event[],
+    )(node.configuration.peers),
     {
       type: 'EmptyAppendEntriesTimerRestart',
       source: node.id

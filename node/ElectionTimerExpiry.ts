@@ -1,7 +1,7 @@
 import * as R from 'ramda';
-import { Node, ElectionTimerEnded, Event } from './types';
+import { Node, ElectionTimerExpiry, Event } from './types';
 
-export default (node: Node, event: ElectionTimerEnded): Event[] => {
+export default (node: Node, event: ElectionTimerExpiry): Event[] => {
   return [
     {
       type: 'ChangeMode',
@@ -21,7 +21,7 @@ export default (node: Node, event: ElectionTimerEnded): Event[] => {
       R.map(nodeId => {
         const lastLogTerm = R.pathOr(1, [node.state.log.length - 1, 'term'], node.state.log);
         return {
-          type: 'RequestVotesRequest',
+          type: 'RequestVoteRequest' as const,
           source: node.id,
           destination: nodeId,
           term: node.state.currentTerm + 1,
@@ -30,7 +30,7 @@ export default (node: Node, event: ElectionTimerEnded): Event[] => {
           lastLogTerm
         };
       })
-    )(node.configuration.peers) as Event[],
+    )(node.configuration.peers),
     {
       type: 'ElectionTimerRestart',
       source: node.id

@@ -1,4 +1,4 @@
-import next from './ElectionTimerEnded';
+import next from './ElectionTimerExpiry';
 
 test('election started after leader fails', () => {
   const node = {
@@ -25,7 +25,7 @@ test('election started after leader fails', () => {
   };
 
   const events = next(node, {
-    type: 'ElectionTimerEnded',
+    type: 'ElectionTimerExpiry',
     destination: 'B'
   });
 
@@ -50,7 +50,7 @@ test('election started after leader fails', () => {
       }
     },
     {
-      type: 'RequestVotesRequest',
+      type: 'RequestVoteRequest',
       source: 'B',
       destination: 'A',
       term: 2,
@@ -59,7 +59,7 @@ test('election started after leader fails', () => {
       lastLogTerm: 1
     },
     {
-      type: 'RequestVotesRequest',
+      type: 'RequestVoteRequest',
       source: 'B',
       destination: 'C',
       term: 2,

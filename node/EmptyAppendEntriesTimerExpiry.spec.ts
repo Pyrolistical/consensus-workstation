@@ -1,4 +1,4 @@
-import next from './EmptyAppendEntriesTimerEnded'
+import next from './EmptyAppendEntriesTimerExpiry'
 
 test('send empty append entries when timer trips', () => {
   const node = {
@@ -34,7 +34,7 @@ test('send empty append entries when timer trips', () => {
   };
 
   const events = next(node, {
-    type: 'EmptyAppendEntriesTimerEnded',
+    type: 'EmptyAppendEntriesTimerExpiry',
     destination: 'A'
   });
 

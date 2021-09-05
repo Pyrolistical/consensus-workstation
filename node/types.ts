@@ -64,8 +64,8 @@ export interface ElectionTimerRestart extends Timer {
   type: "ElectionTimerRestart";
   source: NodeId;
 }
-export interface ElectionTimerEnded extends Timer {
-  type: "ElectionTimerEnded";
+export interface ElectionTimerExpiry extends Timer {
+  type: "ElectionTimerExpiry";
   destination: NodeId;
   // elapsed: number;
 }
@@ -78,8 +78,8 @@ export interface EmptyAppendEntriesTimerRestart extends Timer {
   type: "EmptyAppendEntriesTimerRestart";
   source: NodeId;
 }
-export interface EmptyAppendEntriesTimerEnded extends Timer {
-  type: "EmptyAppendEntriesTimerEnded";
+export interface EmptyAppendEntriesTimerExpiry extends Timer {
+  type: "EmptyAppendEntriesTimerExpiry";
   destination: NodeId;
   // elapsed: number;
 }
@@ -188,10 +188,10 @@ export type Event =
   | RequestVoteRequest
   | RequestVoteResponse
   | ElectionTimerRestart
-  | ElectionTimerEnded
+  | ElectionTimerExpiry
   | ElectionTimerCancel
   | EmptyAppendEntriesTimerRestart
-  | EmptyAppendEntriesTimerEnded
+  | EmptyAppendEntriesTimerExpiry
   | EmptyAppendEntriesTimerCancel
   | SaveConfiguration
   | SaveNodeState

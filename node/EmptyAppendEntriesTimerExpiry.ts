@@ -1,12 +1,13 @@
 import * as R from 'ramda';
-import { Node, EmptyAppendEntriesTimerEnded, Event } from './types';
+import { Node, EmptyAppendEntriesTimerExpiry, Event } from './types';
 
-export default (node: Node, event: EmptyAppendEntriesTimerEnded): Event[] => {
+export default (node: Node, event: EmptyAppendEntriesTimerExpiry): Event[] => {
   return [
     ...R.pipe(
       R.reject<string, 'array'>(R.equals(node.id)),
       R.map((peer) => ({
-        type: 'AppendEntriesRequest',
+        type: 'AppendEntriesRequest' as const,
+        clientId: undefined,
         source: node.id,
         destination: peer,
         term: node.state.currentTerm,
@@ -16,7 +17,7 @@ export default (node: Node, event: EmptyAppendEntriesTimerEnded): Event[] => {
         entries: [],
         leaderCommit: node.volatileState.commitIndex
       }))
-    )(node.configuration.peers) as Event[],
+    )(node.configuration.peers),
     {
       type: 'EmptyAppendEntriesTimerRestart',
       source: node.id
