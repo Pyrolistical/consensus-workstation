@@ -10,19 +10,20 @@
     "react-dom": "17.0.2"
   },
   "devDependencies": {
+    "@snowpack/plugin-typescript": "1.2.1",
     "@types/jest": "27.0.1",
     "@types/ramda": "0.27.44",
-    "esbuild": "0.12.25",
     "jest": "27.0.6",
     "rimraf": "3.0.2",
+    "snowpack": "3.8.8",
     "ts-jest": "27.0.5",
     "typescript": "4.4.2"
   },
   "scripts": {
-    "start": "esbuild index.jsx --serve --servedir=cdn-root --bundle --format=esm --outfile=cdn-root/bundle.js",
+    "start": "snowpack dev",
     "clean": "rimraf dist/",
     "prebuild": "npm run clean",
-    "build": "esbuild index.jsx --bundle --format=esm --outfile=dist/bundle.js",
+    "build": "snowpack build",
     "test": "jest"
   },
   "jest": {
