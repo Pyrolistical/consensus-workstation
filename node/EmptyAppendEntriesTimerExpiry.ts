@@ -7,7 +7,7 @@ export default (node: Node, event: EmptyAppendEntriesTimerExpiry): Event[] => {
       R.reject<string, 'array'>(R.equals(node.id)),
       R.map((peer) => ({
         type: 'AppendEntriesRequest' as const,
-        clientId: undefined,
+        clientRequest: undefined,
         source: node.id,
         destination: peer,
         term: node.state.currentTerm,

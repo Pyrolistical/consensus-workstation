@@ -21,11 +21,12 @@ export interface ClientCommandsResponse extends NetworkMessage {
   type: "ClientCommandsResponse";
   success: boolean;
   leaderId?: string;
+  request: ClientCommandsRequest;
 }
 
 export interface AppendEntriesRequest extends NetworkMessage {
   type: "AppendEntriesRequest";
-  clientId: string | undefined;
+  clientRequest: ClientCommandsRequest | undefined;
   term: number;
   leaderId: NodeId;
   prevLogIndex: number;

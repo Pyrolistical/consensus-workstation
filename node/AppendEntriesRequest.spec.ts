@@ -1,4 +1,4 @@
-import next from './AppendEntriesRequest'
+import next from './AppendEntriesRequest';
 
 test('followers response success if append entries request passes consistency check', () => {
   const node = {
@@ -26,7 +26,12 @@ test('followers response success if append entries request passes consistency ch
 
   const events = next(node, {
     type: 'AppendEntriesRequest',
-    clientId: 'client',
+    clientRequest: {
+      type: 'ClientCommandsRequest',
+      source: 'client',
+      destination: 'leader',
+      commands: ['do thing']
+    },
     source: 'leader',
     destination: 'follower',
     term: 1,
@@ -73,7 +78,12 @@ test('followers response success if append entries request passes consistency ch
       success: true,
       request: {
         type: 'AppendEntriesRequest',
-        clientId: 'client',
+        clientRequest: {
+          type: 'ClientCommandsRequest',
+          source: 'client',
+          destination: 'leader',
+          commands: ['do thing']
+        },
         source: 'leader',
         destination: 'follower',
         term: 1,
@@ -122,7 +132,12 @@ test('followers response failure if they do not share a common log at given inde
 
   const events = next(node, {
     type: 'AppendEntriesRequest',
-    clientId: 'client',
+    clientRequest: {
+      type: 'ClientCommandsRequest',
+      source: 'client',
+      destination: 'leader',
+      commands: ['do thing']
+    },
     source: 'leader',
     destination: 'follower',
     term: 3,
@@ -165,7 +180,12 @@ test('followers response failure if they do not share a common log at given inde
       success: false,
       request: {
         type: 'AppendEntriesRequest',
-        clientId: 'client',
+        clientRequest: {
+          type: 'ClientCommandsRequest',
+          source: 'client',
+          destination: 'leader',
+          commands: ['do thing']
+        },
         source: 'leader',
         destination: 'follower',
         term: 3,
@@ -223,7 +243,12 @@ test('previous leader response failure if they do not share a common log at give
 
   const events = next(node, {
     type: 'AppendEntriesRequest',
-    clientId: 'client',
+    clientRequest: {
+      type: 'ClientCommandsRequest',
+      source: 'client',
+      destination: 'leader',
+      commands: ['do thing']
+    },
     source: 'leader',
     destination: 'previous leader',
     term: 3,
@@ -276,7 +301,12 @@ test('previous leader response failure if they do not share a common log at give
       success: false,
       request: {
         type: 'AppendEntriesRequest',
-        clientId: 'client',
+        clientRequest: {
+          type: 'ClientCommandsRequest',
+          source: 'client',
+          destination: 'leader',
+          commands: ['do thing']
+        },
         source: 'leader',
         destination: 'previous leader',
         term: 3,
@@ -325,7 +355,12 @@ test('followers update their commitIndex with the leaderCommit', () => {
 
   const events = next(node, {
     type: 'AppendEntriesRequest',
-    clientId: 'client',
+    clientRequest: {
+      type: 'ClientCommandsRequest',
+      source: 'client',
+      destination: 'leader',
+      commands: ['do thing']
+    },
     source: 'leader',
     destination: 'follower',
     term: 1,
@@ -357,7 +392,12 @@ test('followers update their commitIndex with the leaderCommit', () => {
       success: true,
       request: {
         type: 'AppendEntriesRequest',
-        clientId: 'client',
+        clientRequest: {
+          type: 'ClientCommandsRequest',
+          source: 'client',
+          destination: 'leader',
+          commands: ['do thing']
+        },
         source: 'leader',
         destination: 'follower',
         term: 1,
@@ -369,7 +409,7 @@ test('followers update their commitIndex with the leaderCommit', () => {
       }
     }
   ]);
-})
+});
 
 test('superseeded leaders convert to followers when they see a higher term', () => {
   const node = {
@@ -410,7 +450,12 @@ test('superseeded leaders convert to followers when they see a higher term', () 
 
   const events = next(node, {
     type: 'AppendEntriesRequest',
-    clientId: 'client',
+    clientRequest: {
+      type: 'ClientCommandsRequest',
+      source: 'client',
+      destination: 'leader',
+      commands: ['do thing']
+    },
     source: 'leader',
     destination: 'previous leader',
     term: 2,
@@ -471,7 +516,12 @@ test('superseeded leaders convert to followers when they see a higher term', () 
       success: true,
       request: {
         type: 'AppendEntriesRequest',
-        clientId: 'client',
+        clientRequest: {
+          type: 'ClientCommandsRequest',
+          source: 'client',
+          destination: 'leader',
+          commands: ['do thing']
+        },
         source: 'leader',
         destination: 'previous leader',
         term: 2,
@@ -488,7 +538,7 @@ test('superseeded leaders convert to followers when they see a higher term', () 
       }
     }
   ]);
-})
+});
 
 test('reject requests with lower terms', () => {
   const node = {
@@ -520,7 +570,12 @@ test('reject requests with lower terms', () => {
 
   const events = next(node, {
     type: 'AppendEntriesRequest',
-    clientId: 'client',
+    clientRequest: {
+      type: 'ClientCommandsRequest',
+      source: 'client',
+      destination: 'leader',
+      commands: ['do thing']
+    },
     source: 'previous leader',
     destination: 'follower',
     term: 1,
@@ -540,7 +595,12 @@ test('reject requests with lower terms', () => {
       success: false,
       request: {
         type: 'AppendEntriesRequest',
-        clientId: 'client',
+        clientRequest: {
+          type: 'ClientCommandsRequest',
+          source: 'client',
+          destination: 'leader',
+          commands: ['do thing']
+        },
         source: 'previous leader',
         destination: 'follower',
         term: 1,
@@ -552,4 +612,4 @@ test('reject requests with lower terms', () => {
       }
     }
   ]);
-})
+});

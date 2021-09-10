@@ -10,7 +10,8 @@ export default (node: Node, event: ClientCommandsRequest): Event[] => {
         destination: event.source,
         source: node.id,
         success: false,
-        leaderId: node.leaderId
+        leaderId: node.leaderId,
+        request: event
       }
     ];
   }
@@ -35,7 +36,7 @@ export default (node: Node, event: ClientCommandsRequest): Event[] => {
       R.reject<string, 'array'>(R.equals(node.id)),
       R.map((peer) => ({
         type: 'AppendEntriesRequest' as const,
-        clientId: event.source,
+        clientRequest: event,
         source: node.id,
         destination: peer,
         term: node.state.currentTerm,

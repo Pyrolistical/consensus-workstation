@@ -18,7 +18,7 @@ export const calculateMajorityMatchIndex = (majorityThreshold: number, leaderInd
   }
   /* istanbul ignore next */
   return -1;
-}
+};
 
 export default (node: LeaderNode, event: AppendEntriesResponse): Event[] => {
   if (event.success) {
@@ -54,13 +54,14 @@ export default (node: LeaderNode, event: AppendEntriesResponse): Event[] => {
           }
         }
       );
-      if (event.request.clientId) {
+      if (event.request.clientRequest) {
         result.push(
           {
             type: 'ClientCommandsResponse',
-            destination: event.request.clientId,
+            destination: event.request.clientRequest.source,
             source: node.id,
-            success: true
+            success: true,
+            request: event.request.clientRequest
           }
         );
       }
@@ -83,7 +84,7 @@ export default (node: LeaderNode, event: AppendEntriesResponse): Event[] => {
       },
       {
         type: 'AppendEntriesRequest',
-        clientId: event.request.clientId,
+        clientRequest: event.request.clientRequest,
         source: node.id,
         destination: event.source,
         term: node.state.currentTerm,

@@ -50,7 +50,12 @@ test('leader updates nextIndex and matchIndex on successful AppendEntries', () =
     success: true,
     request: {
       type: 'AppendEntriesRequest',
-      clientId: 'client',
+      clientRequest: {
+        type: 'ClientCommandsRequest',
+        source: 'client',
+        destination: 'leader',
+        commands: ['do thing']
+      },
       source: 'leader',
       destination: 'follower',
       term: 1,
@@ -134,7 +139,12 @@ test('leader decrementals nextIndex on failed AppendEntries and tries again', ()
     success: false,
     request: {
       type: 'AppendEntriesRequest',
-      clientId: 'client',
+      clientRequest: {
+        type: 'ClientCommandsRequest',
+        source: 'client',
+        destination: 'leader',
+        commands: ['do thing']
+      },
       source: 'leader',
       destination: 'follower',
       term: 1,
@@ -163,7 +173,12 @@ test('leader decrementals nextIndex on failed AppendEntries and tries again', ()
     },
     {
       type: 'AppendEntriesRequest',
-      clientId: 'client',
+      clientRequest: {
+        type: 'ClientCommandsRequest',
+        source: 'client',
+        destination: 'leader',
+        commands: ['do thing']
+      },
       source: 'leader',
       destination: 'follower',
       term: 1,
@@ -230,7 +245,12 @@ test('leader updates commitIndex when a log has be replicated to a majority of f
     success: true,
     request: {
       type: 'AppendEntriesRequest',
-      clientId: 'client',
+      clientRequest: {
+        type: 'ClientCommandsRequest',
+        source: 'client',
+        destination: 'leader',
+        commands: ['do thing']
+      },
       source: 'leader',
       destination: 'follower',
       term: 1,
@@ -245,7 +265,7 @@ test('leader updates commitIndex when a log has be replicated to a majority of f
       ],
       leaderCommit: 0
     }
-  })
+  });
 
   expect(events).toEqual([
     {
@@ -274,7 +294,13 @@ test('leader updates commitIndex when a log has be replicated to a majority of f
       type: 'ClientCommandsResponse',
       destination: 'client',
       source: 'leader',
-      success: true
+      success: true,
+      request: {
+        type: 'ClientCommandsRequest',
+        source: 'client',
+        destination: 'leader',
+        commands: ['do thing']
+      }
     }
   ]);
 });
@@ -324,7 +350,7 @@ test('leader updates commitIndex when a log has be replicated to a majority of f
     success: true,
     request: {
       type: 'AppendEntriesRequest',
-      clientId: undefined,
+      clientRequest: undefined,
       source: 'leader',
       destination: 'follower',
       term: 1,
@@ -339,7 +365,7 @@ test('leader updates commitIndex when a log has be replicated to a majority of f
       ],
       leaderCommit: 0
     }
-  })
+  });
 
   expect(events).toEqual([
     {
@@ -412,7 +438,7 @@ test('leader receive successful empty AppendEntries to avoid election', () => {
     success: true,
     request: {
       type: 'AppendEntriesRequest',
-      clientId: undefined,
+      clientRequest: undefined,
       source: 'leader',
       destination: 'follower',
       term: 1,
@@ -435,5 +461,5 @@ describe('calculateMajorityMatchIndex', () => {
     { majorityThreshold: 2.5, leaderIndex: 3, matchIndex: { f1: 3, f2: 2, f3: 1, f4: 1 }, expectedMajority: 2 }
   ])('leaderIndex $leaderIndex & $matchIndex should have majority of $expectedMajority', ({ majorityThreshold, leaderIndex, matchIndex, expectedMajority }) => {
     expect(calculateMajorityMatchIndex(majorityThreshold, leaderIndex, matchIndex as Index)).toBe(expectedMajority);
-  })
-})
+  });
+});

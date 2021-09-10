@@ -61,7 +61,12 @@ test('client request are distributed from leader to peers', () => {
     },
     {
       type: 'AppendEntriesRequest',
-      clientId: 'client',
+      clientRequest: {
+        type: 'ClientCommandsRequest',
+        source: 'client',
+        destination: 'leader',
+        commands: ['do thing']
+      },
       source: 'leader',
       destination: 'follower',
       term: 1,
@@ -78,7 +83,12 @@ test('client request are distributed from leader to peers', () => {
     },
     {
       type: 'AppendEntriesRequest',
-      clientId: 'client',
+      clientRequest: {
+        type: 'ClientCommandsRequest',
+        source: 'client',
+        destination: 'leader',
+        commands: ['do thing']
+      },
       source: 'leader',
       destination: 'another follower',
       term: 1,
@@ -137,7 +147,13 @@ test('client request is rejected if node is not the leader', () => {
       destination: 'client',
       source: 'follower',
       success: false,
-      leaderId: 'leader'
+      leaderId: 'leader',
+      request: {
+        type: 'ClientCommandsRequest',
+        source: 'client',
+        destination: 'follower',
+        commands: ['do thing']
+      }
     }
   ]);
-})
+});
