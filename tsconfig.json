@@ -11,6 +11,8 @@
     "noUncheckedIndexedAccess": true,
     "noUnusedLocals": true,
     "strictFunctionTypes": true,
-    "strictNullChecks": true
+    "strictNullChecks": true,
+    "allowSyntheticDefaultImports": true,
+    "jsx": "preserve"
   }
 }

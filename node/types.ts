@@ -181,23 +181,23 @@ export interface SaveVoteResults {
 }
 
 export type Event =
-  | ChangeMode
+  | RequestVoteRequest
+  | RequestVoteResponse
   | ClientCommandsRequest
   | ClientCommandsResponse
   | AppendEntriesRequest
   | AppendEntriesResponse
-  | RequestVoteRequest
-  | RequestVoteResponse
+  | ChangeMode
+  | SaveConfiguration
+  | SaveNodeState
+  | SaveVolatileState
+  | SaveVolatileLeaderState
+  | SaveVoteResults
   | ElectionTimerRestart
   | ElectionTimerExpiry
   | ElectionTimerCancel
   | EmptyAppendEntriesTimerRestart
   | EmptyAppendEntriesTimerExpiry
-  | EmptyAppendEntriesTimerCancel
-  | SaveConfiguration
-  | SaveNodeState
-  | SaveVolatileState
-  | SaveVolatileLeaderState
-  | SaveVoteResults;
+  | EmptyAppendEntriesTimerCancel;
 
 export type EventHandler<N extends Node, E extends Event> = (node: N, event: E) => Event[];

@@ -13,6 +13,8 @@
     "@snowpack/plugin-typescript": "1.2.1",
     "@types/jest": "27.0.1",
     "@types/ramda": "0.27.44",
+    "@types/react": "17.0.20",
+    "@types/react-dom": "17.0.9",
     "jest": "27.0.6",
     "rimraf": "3.0.2",
     "snowpack": "3.8.8",
