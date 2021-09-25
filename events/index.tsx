@@ -380,8 +380,7 @@ function EmptyAppendEntriesTimerCancelCard({ event }: { event: EmptyAppendEntrie
   </EventContainer>;
 }
 
-type EventCardProps = { event: Event; };
-export const EventCard = (props: EventCardProps) => {
+export const EventCard = (props: { event: Event; }) => {
   const componentByType: { [eventType: string]: JSXElementConstructor<any>; } = {
     ClientCommandsRequest: ClientCommandsRequestCard,
     ClientCommandsResponse: ClientCommandsResponseCard,
@@ -405,4 +404,4 @@ export const EventCard = (props: EventCardProps) => {
 
   const Component: JSXElementConstructor<any> = componentByType[props.event.type] || (() => <>{props.event.type} not implemented</>);
   return <Component {...props} />;
-};;;;
+};
