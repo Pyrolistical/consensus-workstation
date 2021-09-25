@@ -4,21 +4,29 @@ import styled from "@emotion/styled";
 
 import { EventCard } from '../events';
 import NodeHandler, { NodeCard } from './';
+import { Navigation } from '../worksheet';
 
 const Container = styled.div`
   overflow-x: hidden;
   overflow-y: scroll;
   height: 100%;
-`;
+  padding: 5px;
 
-const EventContainer = styled.div`
   display: flex;
   flex-direction: row;
   justify-content: flex-start;
   align-items: flex-start;
   gap: 5px;
-  flex-wrap: wrap;
-  padding: 5px;
+  ${'' /* flex-wrap: wrap; */}
+`;
+
+const EventContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 5px;
+  ${'' /* flex-wrap: wrap; */}
 `;
 
 const App = () => {
@@ -61,16 +69,24 @@ const App = () => {
     commands: ['do thing']
   };
   const events = NodeHandler(node, inputEvent);
-  return <Container>
-    <h1>Input event</h1>
-    <EventCard event={inputEvent} />
-    <h1>Node</h1>
-    <NodeCard node={node} />
-    <h1>Output events</h1>
-    <EventContainer>
-      {events.map((event, index) => <EventCard key={index} event={event} />)}
-    </EventContainer>
-  </Container>;
+  return <Navigation>
+    <Container>
+      <div>
+        <h1>Input event</h1>
+        <EventCard event={inputEvent} />
+      </div>
+      <div>
+        <h1>Node</h1>
+        <NodeCard node={node} />
+      </div>
+      <div>
+        <h1>Output events</h1>
+        <EventContainer>
+          {events.map((event, index) => <EventCard key={index} event={event} />)}
+        </EventContainer>
+      </div>
+    </Container>
+  </Navigation>;
 };
 
 ReactDOM.render(
