@@ -53,8 +53,8 @@ const TabBody = styled.div`;
 
 const paths = [
   {
-    href: '/node',
-    label: 'Node'
+    href: '/nodes',
+    label: 'Nodes'
   },
   {
     href: '/events',

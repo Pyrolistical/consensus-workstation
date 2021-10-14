@@ -1,6 +1,6 @@
 import React, { StrictMode } from 'react';
 import ReactDOM from 'react-dom';
-import styled from "@emotion/styled";
+import styled from '@emotion/styled';
 
 import { EventCard } from '../events';
 import NodeHandler, { NodeCard } from './';
