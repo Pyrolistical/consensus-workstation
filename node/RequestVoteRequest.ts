@@ -1,23 +1,21 @@
 import type { Node, RequestVoteRequest, Event } from './types'
 
-export default (node: Node, event: RequestVoteRequest): Event[] => {
-  const lastTerm = node.state.log[event.lastLogIndex]?.term ?? 1
+export default ({ id, state }: Node, event: RequestVoteRequest): Event[] => {
+  const { currentTerm, log, votedFor } = state
+  const { source, term, lastLogIndex, lastLogTerm } = event
+  const lastTerm = log[lastLogIndex]?.term ?? 1
   const longerLog =
-    lastTerm &&
-    lastTerm >= event.lastLogTerm &&
-    node.state.log.length - 1 > event.lastLogIndex
-  const alreadyVoted =
-    node.state.currentTerm === event.term &&
-    node.state.votedFor !== event.source
-  if (node.state.currentTerm > event.term || longerLog || alreadyVoted) {
+    lastTerm && lastTerm >= lastLogTerm && log.length - 1 > lastLogIndex
+  const alreadyVoted = currentTerm === term && votedFor !== source
+  if (currentTerm > term || longerLog || alreadyVoted) {
     const result: Event[] = []
-    if (node.state.currentTerm < event.term) {
+    if (currentTerm < term) {
       result.push({
         type: 'SaveNodeState',
-        source: node.id,
+        source: id,
         state: {
-          ...node.state,
-          currentTerm: event.term,
+          ...state,
+          currentTerm: term,
           votedFor: undefined,
         },
       })
@@ -26,9 +24,9 @@ export default (node: Node, event: RequestVoteRequest): Event[] => {
       ...result,
       {
         type: 'RequestVoteResponse',
-        source: node.id,
-        destination: event.source,
-        term: Math.max(node.state.currentTerm, event.term),
+        source: id,
+        destination: source,
+        term: Math.max(currentTerm, term),
         voteGranted: false,
         request: event,
       },
@@ -37,18 +35,18 @@ export default (node: Node, event: RequestVoteRequest): Event[] => {
   return [
     {
       type: 'SaveNodeState',
-      source: node.id,
+      source: id,
       state: {
-        ...node.state,
-        currentTerm: event.term,
-        votedFor: event.source,
+        ...state,
+        currentTerm: term,
+        votedFor: source,
       },
     },
     {
       type: 'RequestVoteResponse',
-      source: node.id,
-      destination: event.source,
-      term: event.term,
+      source: id,
+      destination: source,
+      term,
       voteGranted: true,
       request: event,
     },

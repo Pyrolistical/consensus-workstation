@@ -1,38 +1,42 @@
 import type { Node, ElectionTimerExpiry, Event } from './types'
 
-export default (node: Node, event: ElectionTimerExpiry): Event[] => {
+export default (
+  { id, state, configuration: { peers } }: Node,
+  event: ElectionTimerExpiry
+): Event[] => {
+  const { currentTerm, log } = state
   return [
     {
       type: 'ChangeMode',
-      source: node.id,
+      source: id,
       mode: 'candidate',
     },
     {
       type: 'SaveNodeState',
-      source: node.id,
+      source: id,
       state: {
-        ...node.state,
-        currentTerm: node.state.currentTerm + 1,
+        ...state,
+        currentTerm: currentTerm + 1,
       },
     },
-    ...node.configuration.peers
-      .filter((peer) => peer !== node.id)
+    ...peers
+      .filter((peer) => peer !== id)
       .map((nodeId) => {
-        const lastLogTerm = node.state.log[node.state.log.length - 1]?.term ?? 1
+        const lastLogTerm = log[log.length - 1]?.term ?? 1
 
         return {
           type: 'RequestVoteRequest' as const,
-          source: node.id,
+          source: id,
           destination: nodeId,
-          term: node.state.currentTerm + 1,
-          candidateId: node.id,
-          lastLogIndex: node.state.log.length - 1,
+          term: currentTerm + 1,
+          candidateId: id,
+          lastLogIndex: log.length - 1,
           lastLogTerm,
         }
       }),
     {
       type: 'ElectionTimerRestart',
-      source: node.id,
+      source: id,
     },
   ]
 }

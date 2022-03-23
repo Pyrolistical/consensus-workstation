@@ -1,49 +1,58 @@
-import type { Node, ClientCommandsRequest, Event } from './types'
+import { isFollower, Node, ClientCommandsRequest, Event } from './types'
 
 export default (node: Node, event: ClientCommandsRequest): Event[] => {
-  if (node.mode === 'follower') {
+  const {
+    id,
+    configuration: { peers },
+    state,
+    volatileState: { commitIndex },
+  } = node
+  const { source, commands } = event
+  const { currentTerm, log } = state
+  if (isFollower(node)) {
+    const { leaderId } = node
     return [
       {
         type: 'ClientCommandsResponse',
-        destination: event.source,
-        source: node.id,
+        destination: source,
+        source: id,
         success: false,
-        leaderId: node.leaderId,
+        leaderId,
         request: event,
       },
     ]
   }
 
-  const entries = event.commands.map((command) => ({
-    term: node.state.currentTerm,
+  const entries = commands.map((command) => ({
+    term: currentTerm,
     command,
   }))
   return [
     {
       type: 'SaveNodeState',
-      source: node.id,
+      source: id,
       state: {
-        ...node.state,
-        log: [...node.state.log, ...entries],
+        ...state,
+        log: [...log, ...entries],
       },
     },
-    ...node.configuration.peers
-      .filter((peer) => peer !== node.id)
+    ...peers
+      .filter((peer) => peer !== id)
       .map((peer) => ({
         type: 'AppendEntriesRequest' as const,
         clientRequest: event,
-        source: node.id,
+        source: id,
         destination: peer,
-        term: node.state.currentTerm,
-        leaderId: node.id,
-        prevLogIndex: node.state.log.length - 1,
-        prevLogTerm: node.state.log[node.state.log.length - 1]?.term ?? 1,
+        term: currentTerm,
+        leaderId: id,
+        prevLogIndex: log.length - 1,
+        prevLogTerm: log[log.length - 1]?.term ?? 1,
         entries,
-        leaderCommit: node.volatileState.commitIndex,
+        leaderCommit: commitIndex,
       })),
     {
       type: 'EmptyAppendEntriesTimerRestart',
-      source: node.id,
+      source: id,
     },
   ]
 }

@@ -1,23 +1,27 @@
 import type { Node, AppendEntriesRequest, Event } from './types'
 
-export default (node: Node, event: AppendEntriesRequest): Event[] => {
-  if (event.term < node.state.currentTerm) {
+export default (
+  { id, state, mode, volatileState }: Node,
+  event: AppendEntriesRequest
+): Event[] => {
+  const { currentTerm, log } = state
+  const { source, term, prevLogIndex, prevLogTerm, leaderCommit, entries } =
+    event
+  if (term < currentTerm) {
     return [
       {
         type: 'AppendEntriesResponse',
-        destination: event.source,
-        source: node.id,
-        term: node.state.currentTerm,
+        destination: source,
+        source: id,
+        term: currentTerm,
         success: false,
         request: event,
       },
     ]
   }
-  const descended =
-    node.mode !== 'follower' && event.term > node.state.currentTerm
+  const descended = mode !== 'follower' && term > currentTerm
 
-  const sharesCommonLog =
-    node.state.log[event.prevLogIndex]?.term === event.prevLogTerm
+  const sharesCommonLog = log[prevLogIndex]?.term === prevLogTerm
 
   if (!sharesCommonLog) {
     const result: Event[] = []
@@ -25,32 +29,32 @@ export default (node: Node, event: AppendEntriesRequest): Event[] => {
       result.push(
         {
           type: 'ChangeMode',
-          source: node.id,
+          source: id,
           mode: 'follower',
-          leaderId: event.source,
+          leaderId: source,
         },
         {
           type: 'EmptyAppendEntriesTimerCancel',
-          source: node.id,
+          source: id,
         },
         {
           type: 'SaveNodeState',
-          source: node.id,
+          source: id,
           state: {
-            ...node.state,
-            currentTerm: event.term,
-            log: node.state.log.slice(0, event.prevLogIndex),
+            ...state,
+            currentTerm: term,
+            log: log.slice(0, prevLogIndex),
           },
         }
       )
     } else {
       result.push({
         type: 'SaveNodeState',
-        source: node.id,
+        source: id,
         state: {
-          ...node.state,
-          currentTerm: event.term,
-          log: node.state.log.slice(0, event.prevLogIndex),
+          ...state,
+          currentTerm: term,
+          log: log.slice(0, prevLogIndex),
         },
       })
     }
@@ -58,13 +62,13 @@ export default (node: Node, event: AppendEntriesRequest): Event[] => {
       ...result,
       {
         type: 'ElectionTimerRestart',
-        source: node.id,
+        source: id,
       },
       {
         type: 'AppendEntriesResponse',
-        source: node.id,
-        destination: event.source,
-        term: event.term,
+        source: id,
+        destination: source,
+        term,
         success: false,
         request: event,
       },
@@ -72,13 +76,13 @@ export default (node: Node, event: AppendEntriesRequest): Event[] => {
   }
 
   const result: Event[] = []
-  if (event.leaderCommit > node.volatileState.commitIndex) {
+  if (leaderCommit > volatileState.commitIndex) {
     result.push({
       type: 'SaveVolatileState',
-      source: node.id,
+      source: id,
       volatileState: {
-        ...node.volatileState,
-        commitIndex: event.leaderCommit,
+        ...volatileState,
+        commitIndex: leaderCommit,
       },
     })
   }
@@ -86,31 +90,31 @@ export default (node: Node, event: AppendEntriesRequest): Event[] => {
     result.push(
       {
         type: 'ChangeMode',
-        source: node.id,
+        source: id,
         mode: 'follower',
-        leaderId: event.source,
+        leaderId: source,
       },
       {
         type: 'EmptyAppendEntriesTimerCancel',
-        source: node.id,
+        source: id,
       },
       {
         type: 'SaveNodeState',
-        source: node.id,
+        source: id,
         state: {
-          ...node.state,
-          currentTerm: event.term,
-          log: [...node.state.log, ...event.entries],
+          ...state,
+          currentTerm: term,
+          log: [...log, ...entries],
         },
       }
     )
-  } else if (event.entries.length > 0) {
+  } else if (entries.length > 0) {
     result.push({
       type: 'SaveNodeState',
-      source: node.id,
+      source: id,
       state: {
-        ...node.state,
-        log: [...node.state.log, ...event.entries],
+        ...state,
+        log: [...log, ...entries],
       },
     })
   }
@@ -118,13 +122,13 @@ export default (node: Node, event: AppendEntriesRequest): Event[] => {
     ...result,
     {
       type: 'ElectionTimerRestart',
-      source: node.id,
+      source: id,
     },
     {
       type: 'AppendEntriesResponse',
-      source: node.id,
-      destination: event.source,
-      term: event.term,
+      source: id,
+      destination: source,
+      term,
       success: true,
       request: event,
     },

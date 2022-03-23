@@ -141,6 +141,10 @@ export interface CandidateNode extends CommonNode {
 
 export type Node = LeaderNode | FollowerNode | CandidateNode
 
+export function isFollower(node: Node): node is FollowerNode {
+  return node.mode === 'follower'
+}
+
 export interface ChangeMode {
   type: 'ChangeMode'
   source: NodeId

@@ -1,24 +1,32 @@
 import type { Node, EmptyAppendEntriesTimerExpiry, Event } from './types'
 
-export default (node: Node, event: EmptyAppendEntriesTimerExpiry): Event[] => {
+export default (
+  {
+    id,
+    state: { currentTerm, log },
+    configuration: { peers },
+    volatileState: { commitIndex },
+  }: Node,
+  event: EmptyAppendEntriesTimerExpiry
+): Event[] => {
   return [
-    ...node.configuration.peers
-      .filter((peer) => peer !== node.id)
+    ...peers
+      .filter((peer) => peer !== id)
       .map((peer) => ({
         type: 'AppendEntriesRequest' as const,
         clientRequest: undefined,
-        source: node.id,
+        source: id,
         destination: peer,
-        term: node.state.currentTerm,
-        leaderId: node.id,
-        prevLogIndex: node.state.log.length - 1,
-        prevLogTerm: node.state.log[node.state.log.length - 1]?.term ?? 1,
+        term: currentTerm,
+        leaderId: id,
+        prevLogIndex: log.length - 1,
+        prevLogTerm: log[log.length - 1]?.term ?? 1,
         entries: [],
-        leaderCommit: node.volatileState.commitIndex,
+        leaderCommit: commitIndex,
       })),
     {
       type: 'EmptyAppendEntriesTimerRestart',
-      source: node.id,
+      source: id,
     },
   ]
 }

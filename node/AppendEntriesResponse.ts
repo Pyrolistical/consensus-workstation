@@ -16,89 +16,98 @@ export const calculateMajorityMatchIndex = (
       return index
     }
   }
-  /* istanbul ignore next */
+
   return -1
 }
 
-export default (node: LeaderNode, event: AppendEntriesResponse): Event[] => {
-  if (event.success) {
+export default (
+  {
+    id,
+    state: { currentTerm, log },
+    configuration: { peers },
+    volatileState,
+    volatileLeaderState,
+  }: LeaderNode,
+  {
+    success,
+    source,
+    request: { prevLogIndex, entries, clientRequest },
+  }: AppendEntriesResponse
+): Event[] => {
+  if (success) {
     const updatedMatchIndex = {
-      ...node.volatileLeaderState.matchIndex,
-      [event.source]: event.request.prevLogIndex + event.request.entries.length,
+      ...volatileLeaderState.matchIndex,
+      [source]: prevLogIndex + entries.length,
     }
     const majorityMatchIndex = calculateMajorityMatchIndex(
-      node.configuration.peers.length / 2,
-      node.state.log.length - 1,
+      peers.length / 2,
+      log.length - 1,
       updatedMatchIndex
     )
     const result: Event[] = []
-    if (event.request.entries.length > 0) {
+    if (entries.length > 0) {
       result.push({
         type: 'SaveVolatileLeaderState',
         source: 'leader',
         volatileLeaderState: {
           nextIndex: {
-            ...node.volatileLeaderState.nextIndex,
-            [event.source]:
-              event.request.prevLogIndex + event.request.entries.length + 1,
+            ...volatileLeaderState.nextIndex,
+            [source]: prevLogIndex + entries.length + 1,
           },
           matchIndex: updatedMatchIndex,
         },
       })
     }
-    if (majorityMatchIndex > node.volatileState.commitIndex) {
+    if (majorityMatchIndex > volatileState.commitIndex) {
       result.push({
         type: 'SaveVolatileState',
-        source: node.id,
+        source: id,
         volatileState: {
-          ...node.volatileState,
+          ...volatileState,
           commitIndex: majorityMatchIndex,
         },
       })
-      if (event.request.clientRequest) {
+      if (clientRequest) {
         result.push({
           type: 'ClientCommandsResponse',
-          destination: event.request.clientRequest.source,
-          source: node.id,
+          destination: clientRequest.source,
+          source: id,
           success: true,
-          request: event.request.clientRequest,
+          request: clientRequest,
         })
       }
     }
     return result
   } else {
-    const nextIndex =
-      (node.volatileLeaderState.nextIndex[event.source] ?? 1) - 1
+    const nextIndex = (volatileLeaderState.nextIndex[source] ?? 1) - 1
     const previousLogIndex = nextIndex - 1
     return [
       {
         type: 'SaveVolatileLeaderState',
         source: 'leader',
         volatileLeaderState: {
-          ...node.volatileLeaderState,
+          ...volatileLeaderState,
           nextIndex: {
-            ...node.volatileLeaderState.nextIndex,
-            [event.source]: nextIndex,
+            ...volatileLeaderState.nextIndex,
+            [source]: nextIndex,
           },
         },
       },
       {
         type: 'AppendEntriesRequest',
-        clientRequest: event.request.clientRequest,
-        source: node.id,
-        destination: event.source,
-        term: node.state.currentTerm,
-        leaderId: node.id,
+        clientRequest,
+        source: id,
+        destination: source,
+        term: currentTerm,
+        leaderId: id,
         prevLogIndex: previousLogIndex,
-        prevLogTerm: node.state.log[previousLogIndex]?.term ?? 1,
-        entries: node.state.log.slice(
-          -(node.state.log.length - 1 - previousLogIndex)
-        ),
-        leaderCommit: node.volatileState.commitIndex,
+        prevLogTerm: log[previousLogIndex]?.term ?? 1,
+        entries: log.slice(-(log.length - 1 - previousLogIndex)),
+        leaderCommit: volatileState.commitIndex,
       },
       {
         type: 'EmptyAppendEntriesTimerRestart',
-        source: node.id,
+        source: id,
       },
     ]
   }
