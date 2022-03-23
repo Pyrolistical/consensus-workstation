@@ -1,9 +1,10 @@
 import next from './ElectionTimerExpiry'
+import type { FollowerNode } from './types'
 
 test('election started after leader fails', () => {
-  const node = {
+  const node: FollowerNode = {
     id: 'B',
-    mode: 'follower' as const,
+    mode: 'follower',
     leaderId: 'A',
     configuration: {
       peers: ['A', 'B', 'C'],

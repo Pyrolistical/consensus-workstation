@@ -1,10 +1,10 @@
 import next, { calculateMajorityMatchIndex } from './AppendEntriesResponse'
-import type { Index } from './types'
+import type { Index, LeaderNode } from './types'
 
 test('leader updates nextIndex and matchIndex on successful AppendEntries', () => {
-  const node = {
+  const node: LeaderNode = {
     id: 'leader',
-    mode: 'leader' as const,
+    mode: 'leader',
     configuration: {
       peers: [
         'leader',
@@ -101,9 +101,9 @@ test('leader updates nextIndex and matchIndex on successful AppendEntries', () =
 })
 
 test('leader decrementals nextIndex on failed AppendEntries and tries again', () => {
-  const node = {
+  const node: LeaderNode = {
     id: 'leader',
-    mode: 'leader' as const,
+    mode: 'leader',
     configuration: {
       peers: ['leader', 'follower', 'another follower'],
     },
@@ -207,9 +207,9 @@ test('leader decrementals nextIndex on failed AppendEntries and tries again', ()
 })
 
 test('leader updates commitIndex when a log has be replicated to a majority of followers from client request', () => {
-  const node = {
+  const node: LeaderNode = {
     id: 'leader',
-    mode: 'leader' as const,
+    mode: 'leader',
     configuration: {
       peers: ['leader', 'follower', 'another follower'],
     },
@@ -312,9 +312,9 @@ test('leader updates commitIndex when a log has be replicated to a majority of f
 })
 
 test('leader updates commitIndex when a log has be replicated to a majority of followers from follower catchup', () => {
-  const node = {
+  const node: LeaderNode = {
     id: 'leader',
-    mode: 'leader' as const,
+    mode: 'leader',
     configuration: {
       peers: ['leader', 'follower', 'another follower'],
     },
@@ -400,9 +400,9 @@ test('leader updates commitIndex when a log has be replicated to a majority of f
 })
 
 test('leader receive successful empty AppendEntries to avoid election', () => {
-  const node = {
+  const node: LeaderNode = {
     id: 'leader',
-    mode: 'leader' as const,
+    mode: 'leader',
     configuration: {
       peers: ['leader', 'follower', 'another follower'],
     },

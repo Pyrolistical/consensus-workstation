@@ -1,9 +1,10 @@
 import next from './AppendEntriesRequest'
+import type { FollowerNode, LeaderNode } from './types'
 
 test('followers response success if append entries request passes consistency check', () => {
-  const node = {
+  const node: FollowerNode = {
     id: 'follower',
-    mode: 'follower' as const,
+    mode: 'follower',
     leaderId: 'leader',
     configuration: {
       peers: ['leader', 'follower', 'another follower'],
@@ -103,9 +104,9 @@ test('followers response success if append entries request passes consistency ch
 })
 
 test('followers response failure if they do not share a common log at given index', () => {
-  const node = {
+  const node: FollowerNode = {
     id: 'follower',
-    mode: 'follower' as const,
+    mode: 'follower',
     leaderId: 'leader',
     configuration: {
       peers: ['leader', 'follower', 'another follower'],
@@ -205,9 +206,9 @@ test('followers response failure if they do not share a common log at given inde
 })
 
 test('previous leader response failure if they do not share a common log at given index', () => {
-  const node = {
+  const node: LeaderNode = {
     id: 'previous leader',
-    mode: 'leader' as const,
+    mode: 'leader',
     configuration: {
       peers: ['leader', 'follower', 'previous leader'],
     },
@@ -326,9 +327,9 @@ test('previous leader response failure if they do not share a common log at give
 })
 
 test('followers update their commitIndex with the leaderCommit', () => {
-  const node = {
+  const node: FollowerNode = {
     id: 'follower',
-    mode: 'follower' as const,
+    mode: 'follower',
     leaderId: 'leader',
     configuration: {
       peers: ['leader', 'follower', 'another follower'],
@@ -412,9 +413,9 @@ test('followers update their commitIndex with the leaderCommit', () => {
 })
 
 test('superseeded leaders convert to followers when they see a higher term', () => {
-  const node = {
+  const node: LeaderNode = {
     id: 'previous leader',
-    mode: 'leader' as const,
+    mode: 'leader',
     configuration: {
       peers: ['leader', 'follower', 'previous leader'],
     },
@@ -541,9 +542,9 @@ test('superseeded leaders convert to followers when they see a higher term', () 
 })
 
 test('reject requests with lower terms', () => {
-  const node = {
+  const node: FollowerNode = {
     id: 'follower',
-    mode: 'follower' as const,
+    mode: 'follower',
     leaderId: 'leader',
     configuration: {
       peers: ['leader', 'follower', 'previous leader'],

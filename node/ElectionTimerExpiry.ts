@@ -21,19 +21,15 @@ export default (
     },
     ...peers
       .filter((peer) => peer !== id)
-      .map((nodeId) => {
-        const lastLogTerm = log[log.length - 1]?.term ?? 1
-
-        return {
-          type: 'RequestVoteRequest' as const,
-          source: id,
-          destination: nodeId,
-          term: currentTerm + 1,
-          candidateId: id,
-          lastLogIndex: log.length - 1,
-          lastLogTerm,
-        }
-      }),
+      .map((nodeId) => ({
+        type: 'RequestVoteRequest' as const,
+        source: id,
+        destination: nodeId,
+        term: currentTerm + 1,
+        candidateId: id,
+        lastLogIndex: log.length - 1,
+        lastLogTerm: log[log.length - 1]?.term ?? 1,
+      })),
     {
       type: 'ElectionTimerRestart',
       source: id,

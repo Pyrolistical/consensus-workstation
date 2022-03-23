@@ -1,9 +1,10 @@
 import next from './RequestVoteResponse'
+import type { CandidateNode } from './types'
 
 test('save vote results before majority is reached', () => {
-  const node = {
+  const node: CandidateNode = {
     id: 'A',
-    mode: 'candidate' as const,
+    mode: 'candidate',
     configuration: {
       peers: ['A', 'B', 'C'],
     },
@@ -56,9 +57,9 @@ test('save vote results before majority is reached', () => {
 })
 
 test('become the leader if received majority votes', () => {
-  const node = {
+  const node: CandidateNode = {
     id: 'A',
-    mode: 'candidate' as const,
+    mode: 'candidate',
     configuration: {
       peers: ['A', 'B', 'C'],
     },

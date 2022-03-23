@@ -1,9 +1,10 @@
 import next from './ClientCommandsRequest'
+import type { FollowerNode, LeaderNode } from './types'
 
 test('client request are distributed from leader to peers', () => {
-  const node = {
+  const node: LeaderNode = {
     id: 'leader',
-    mode: 'leader' as const,
+    mode: 'leader',
     configuration: {
       peers: ['leader', 'follower', 'another follower'],
     },
@@ -111,9 +112,9 @@ test('client request are distributed from leader to peers', () => {
 })
 
 test('client request is rejected if node is not the leader', () => {
-  const node = {
+  const node: FollowerNode = {
     id: 'follower',
-    mode: 'follower' as const,
+    mode: 'follower',
     leaderId: 'leader',
     configuration: {
       peers: ['leader', 'follower', 'another follower'],

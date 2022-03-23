@@ -1,9 +1,10 @@
 import next from './EmptyAppendEntriesTimerExpiry'
+import type { LeaderNode } from './types'
 
 test('send empty append entries when timer trips', () => {
-  const node = {
+  const node: LeaderNode = {
     id: 'A',
-    mode: 'leader' as const,
+    mode: 'leader',
     configuration: {
       peers: ['A', 'B', 'C'],
     },

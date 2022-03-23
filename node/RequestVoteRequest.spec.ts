@@ -1,9 +1,10 @@
 import next from './RequestVoteRequest'
+import type { FollowerNode } from './types'
 
 test('node rejects vote if own term is higher', () => {
-  const node = {
+  const node: FollowerNode = {
     id: 'follower',
-    mode: 'follower' as const,
+    mode: 'follower',
     leaderId: 'leader',
     configuration: {
       peers: ['leader', 'follower', 'another node'],
@@ -55,9 +56,9 @@ test('node rejects vote if own term is higher', () => {
 })
 
 test('node rejects vote if own log is longer', () => {
-  const node = {
+  const node: FollowerNode = {
     id: 'follower',
-    mode: 'follower' as const,
+    mode: 'follower',
     leaderId: 'leader',
     configuration: {
       peers: ['leader', 'follower', 'another node'],
@@ -139,9 +140,9 @@ test('node rejects vote if own log is longer', () => {
 })
 
 test('node rejects vote if already voted for somebody else in current term', () => {
-  const node = {
+  const node: FollowerNode = {
     id: 'follower',
-    mode: 'follower' as const,
+    mode: 'follower',
     leaderId: 'leader',
     configuration: {
       peers: ['leader', 'follower', 'another node'],
@@ -201,9 +202,9 @@ test('node rejects vote if already voted for somebody else in current term', () 
 })
 
 test('grant vote of candidate log is as long as own', () => {
-  const node = {
+  const node: FollowerNode = {
     id: 'follower',
-    mode: 'follower' as const,
+    mode: 'follower',
     leaderId: 'leader',
     configuration: {
       peers: ['leader', 'follower', 'another node'],
