@@ -1,183 +1,181 @@
+export type NodeId = string
+
 export type NetworkMessage = {
-  source: NodeId;
-  destination: NodeId;
-};
+  source: NodeId
+  destination: NodeId
+}
 
-export type NodeId = string;
-
-export type Command = string;
+export type Command = string
 
 export type Entry = {
-  term: number;
-  command: Command;
-};
+  term: number
+  command: Command
+}
 
 export interface ClientCommandsRequest extends NetworkMessage {
-  type: "ClientCommandsRequest";
-  commands: Command[];
+  type: 'ClientCommandsRequest'
+  commands: Command[]
 }
 
 export interface ClientCommandsResponse extends NetworkMessage {
-  type: "ClientCommandsResponse";
-  success: boolean;
-  leaderId?: string;
-  request: ClientCommandsRequest;
+  type: 'ClientCommandsResponse'
+  success: boolean
+  leaderId?: string
+  request: ClientCommandsRequest
 }
 
 export interface AppendEntriesRequest extends NetworkMessage {
-  type: "AppendEntriesRequest";
-  clientRequest: ClientCommandsRequest | undefined;
-  term: number;
-  leaderId: NodeId;
-  prevLogIndex: number;
-  prevLogTerm: number;
-  entries: Entry[];
-  leaderCommit: number;
+  type: 'AppendEntriesRequest'
+  clientRequest: ClientCommandsRequest | undefined
+  term: number
+  leaderId: NodeId
+  prevLogIndex: number
+  prevLogTerm: number
+  entries: Entry[]
+  leaderCommit: number
 }
 
 export interface AppendEntriesResponse extends NetworkMessage {
-  type: "AppendEntriesResponse";
-  term: number;
-  success: boolean;
-  request: AppendEntriesRequest;
+  type: 'AppendEntriesResponse'
+  term: number
+  success: boolean
+  request: AppendEntriesRequest
 }
 
 export interface RequestVoteRequest extends NetworkMessage {
-  type: "RequestVoteRequest";
-  term: number;
-  candidateId: NodeId;
-  lastLogIndex: number;
-  lastLogTerm: number;
+  type: 'RequestVoteRequest'
+  term: number
+  candidateId: NodeId
+  lastLogIndex: number
+  lastLogTerm: number
 }
 
 export interface RequestVoteResponse extends NetworkMessage {
-  type: "RequestVoteResponse";
-  term: number;
-  voteGranted: boolean;
-  request: RequestVoteRequest;
+  type: 'RequestVoteResponse'
+  term: number
+  voteGranted: boolean
+  request: RequestVoteRequest
 }
 
 export interface Timer {
-  // timeout: number;
+  // timeout: number
 }
 
 export interface ElectionTimerRestart extends Timer {
-  type: "ElectionTimerRestart";
-  source: NodeId;
+  type: 'ElectionTimerRestart'
+  source: NodeId
 }
 export interface ElectionTimerExpiry extends Timer {
-  type: "ElectionTimerExpiry";
-  destination: NodeId;
+  type: 'ElectionTimerExpiry'
+  destination: NodeId
   // elapsed: number;
 }
 export interface ElectionTimerCancel extends Timer {
-  type: "ElectionTimerCancel";
-  source: NodeId;
+  type: 'ElectionTimerCancel'
+  source: NodeId
 }
 
 export interface EmptyAppendEntriesTimerRestart extends Timer {
-  type: "EmptyAppendEntriesTimerRestart";
-  source: NodeId;
+  type: 'EmptyAppendEntriesTimerRestart'
+  source: NodeId
 }
 export interface EmptyAppendEntriesTimerExpiry extends Timer {
-  type: "EmptyAppendEntriesTimerExpiry";
-  destination: NodeId;
+  type: 'EmptyAppendEntriesTimerExpiry'
+  destination: NodeId
   // elapsed: number;
 }
 export interface EmptyAppendEntriesTimerCancel extends Timer {
-  type: "EmptyAppendEntriesTimerCancel";
-  source: NodeId;
-}
-
-export interface CommonNode {
-  id: NodeId;
-  configuration: Configuration;
-  state: NodeState;
-  volatileState: VolatileState;
-}
-
-export type Node =
-  | LeaderNode
-  | FollowerNode
-  | CandidateNode;
-
-export interface LeaderNode extends CommonNode {
-  mode: 'leader';
-  volatileLeaderState: VolatileLeaderState;
-}
-
-export interface FollowerNode extends CommonNode {
-  mode: 'follower';
-  leaderId: NodeId;
-}
-
-export interface CandidateNode extends CommonNode {
-  mode: 'candidate';
-  voteResults: VoteResults;
+  type: 'EmptyAppendEntriesTimerCancel'
+  source: NodeId
 }
 
 export interface Configuration {
-  peers: NodeId[];
+  peers: NodeId[]
 }
 
 export type NodeState = {
-  currentTerm: number;
-  votedFor: NodeId | null;
-  log: Entry[];
-};
+  currentTerm: number
+  votedFor: NodeId | undefined
+  log: Entry[]
+}
 
 export type VolatileState = {
-  commitIndex: number;
-  lastApplied: number;
-};
+  commitIndex: number
+  lastApplied: number
+}
+
+export interface CommonNode {
+  id: NodeId
+  configuration: Configuration
+  state: NodeState
+  volatileState: VolatileState
+}
 
 export type Index = {
-  [nodeId: string]: number;
-};
+  [nodeId: string]: number
+}
+
 export type VolatileLeaderState = {
-  nextIndex: Index;
-  matchIndex: Index;
-};
+  nextIndex: Index
+  matchIndex: Index
+}
+
+export interface LeaderNode extends CommonNode {
+  mode: 'leader'
+  volatileLeaderState: VolatileLeaderState
+}
+
+export interface FollowerNode extends CommonNode {
+  mode: 'follower'
+  leaderId: NodeId
+}
 
 export type VoteResults = {
-  [node: string]: boolean;
-};
+  [node: string]: boolean
+}
+
+export interface CandidateNode extends CommonNode {
+  mode: 'candidate'
+  voteResults: VoteResults
+}
+
+export type Node = LeaderNode | FollowerNode | CandidateNode
 
 export interface ChangeMode {
-  type: "ChangeMode";
-  source: NodeId;
-  mode: 'leader' | 'follower' | 'candidate';
-  leaderId?: NodeId;
+  type: 'ChangeMode'
+  source: NodeId
+  mode: 'leader' | 'follower' | 'candidate'
+  leaderId?: NodeId
 }
 
 export interface SaveConfiguration {
-  type: "SaveConfiguration";
-  source: NodeId;
-  configuration: Configuration;
+  type: 'SaveConfiguration'
+  source: NodeId
+  configuration: Configuration
 }
 
 export interface SaveNodeState {
-  type: "SaveNodeState";
-  source: NodeId;
-  state: NodeState;
+  type: 'SaveNodeState'
+  source: NodeId
+  state: NodeState
 }
 
 export interface SaveVolatileState {
-  type: "SaveVolatileState";
-  source: NodeId;
-  volatileState: VolatileState;
+  type: 'SaveVolatileState'
+  source: NodeId
+  volatileState: VolatileState
 }
 
 export interface SaveVolatileLeaderState {
-  type: "SaveVolatileLeaderState";
-  source: NodeId;
-  volatileLeaderState: VolatileLeaderState;
+  type: 'SaveVolatileLeaderState'
+  source: NodeId
+  volatileLeaderState: VolatileLeaderState
 }
 
 export interface SaveVoteResults {
-  type: "SaveVoteResults";
-  source: NodeId;
-  voteResults: VoteResults;
+  type: 'SaveVoteResults'
+  source: NodeId
+  voteResults: VoteResults
 }
 
 export type Event =
@@ -198,6 +196,9 @@ export type Event =
   | ElectionTimerCancel
   | EmptyAppendEntriesTimerRestart
   | EmptyAppendEntriesTimerExpiry
-  | EmptyAppendEntriesTimerCancel;
+  | EmptyAppendEntriesTimerCancel
 
-export type EventHandler<N extends Node, E extends Event> = (node: N, event: E) => Event[];
+export type EventHandler<N extends Node, E extends Event> = (
+  node: N,
+  event: E
+) => Event[]

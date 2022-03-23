@@ -5,7 +5,7 @@ test('save vote results before majority is reached', () => {
     id: 'A',
     mode: 'candidate' as const,
     configuration: {
-      peers: ['A', 'B', 'C']
+      peers: ['A', 'B', 'C'],
     },
     state: {
       currentTerm: 3,
@@ -13,18 +13,18 @@ test('save vote results before majority is reached', () => {
       log: [
         {
           term: 1,
-          command: ''
-        }
-      ]
+          command: '',
+        },
+      ],
     },
     volatileState: {
       commitIndex: 0,
-      lastApplied: 0
+      lastApplied: 0,
     },
     voteResults: {
-      A: true
-    }
-  };
+      A: true,
+    },
+  }
 
   const events = next(node, {
     type: 'RequestVoteResponse',
@@ -39,9 +39,9 @@ test('save vote results before majority is reached', () => {
       term: 3,
       candidateId: 'A',
       lastLogIndex: 0,
-      lastLogTerm: 1
-    }
-  });
+      lastLogTerm: 1,
+    },
+  })
 
   expect(events).toEqual([
     {
@@ -49,18 +49,18 @@ test('save vote results before majority is reached', () => {
       source: 'A',
       voteResults: {
         A: true,
-        B: false
-      }
-    }
-  ]);
-});
+        B: false,
+      },
+    },
+  ])
+})
 
 test('become the leader if received majority votes', () => {
   const node = {
     id: 'A',
     mode: 'candidate' as const,
     configuration: {
-      peers: ['A', 'B', 'C']
+      peers: ['A', 'B', 'C'],
     },
     state: {
       currentTerm: 3,
@@ -68,18 +68,18 @@ test('become the leader if received majority votes', () => {
       log: [
         {
           term: 1,
-          command: ''
-        }
-      ]
+          command: '',
+        },
+      ],
     },
     volatileState: {
       commitIndex: 1,
-      lastApplied: 0
+      lastApplied: 0,
     },
     voteResults: {
-      A: true
-    }
-  };
+      A: true,
+    },
+  }
 
   const events = next(node, {
     type: 'RequestVoteResponse',
@@ -94,15 +94,15 @@ test('become the leader if received majority votes', () => {
       term: 3,
       candidateId: 'A',
       lastLogIndex: 0,
-      lastLogTerm: 1
-    }
-  });
+      lastLogTerm: 1,
+    },
+  })
 
   expect(events).toEqual([
     {
       type: 'ChangeMode',
       source: 'A',
-      mode: 'leader'
+      mode: 'leader',
     },
     {
       type: 'SaveVolatileLeaderState',
@@ -110,13 +110,13 @@ test('become the leader if received majority votes', () => {
       volatileLeaderState: {
         nextIndex: {
           B: 1,
-          C: 1
+          C: 1,
         },
         matchIndex: {
           B: 0,
-          C: 0
-        }
-      }
+          C: 0,
+        },
+      },
     },
     {
       type: 'AppendEntriesRequest',
@@ -127,7 +127,7 @@ test('become the leader if received majority votes', () => {
       prevLogIndex: 0,
       prevLogTerm: 1,
       entries: [],
-      leaderCommit: 1
+      leaderCommit: 1,
     },
     {
       type: 'AppendEntriesRequest',
@@ -138,11 +138,11 @@ test('become the leader if received majority votes', () => {
       prevLogIndex: 0,
       prevLogTerm: 1,
       entries: [],
-      leaderCommit: 1
+      leaderCommit: 1,
     },
     {
       type: 'EmptyAppendEntriesTimerRestart',
-      source: 'A'
-    }
-  ]);
-});
+      source: 'A',
+    },
+  ])
+})

@@ -5,7 +5,7 @@ test('send empty append entries when timer trips', () => {
     id: 'A',
     mode: 'leader' as const,
     configuration: {
-      peers: ['A', 'B', 'C']
+      peers: ['A', 'B', 'C'],
     },
     state: {
       currentTerm: 3,
@@ -13,30 +13,30 @@ test('send empty append entries when timer trips', () => {
       log: [
         {
           term: 1,
-          command: ''
-        }
-      ]
+          command: '',
+        },
+      ],
     },
     volatileState: {
       commitIndex: 1,
-      lastApplied: 0
+      lastApplied: 0,
     },
     volatileLeaderState: {
       nextIndex: {
         B: 1,
-        C: 1
+        C: 1,
       },
       matchIndex: {
         B: 0,
-        C: 0
-      }
-    }
-  };
+        C: 0,
+      },
+    },
+  }
 
   const events = next(node, {
     type: 'EmptyAppendEntriesTimerExpiry',
-    destination: 'A'
-  });
+    destination: 'A',
+  })
 
   expect(events).toEqual([
     {
@@ -48,7 +48,7 @@ test('send empty append entries when timer trips', () => {
       prevLogIndex: 0,
       prevLogTerm: 1,
       entries: [],
-      leaderCommit: 1
+      leaderCommit: 1,
     },
     {
       type: 'AppendEntriesRequest',
@@ -59,11 +59,11 @@ test('send empty append entries when timer trips', () => {
       prevLogIndex: 0,
       prevLogTerm: 1,
       entries: [],
-      leaderCommit: 1
+      leaderCommit: 1,
     },
     {
       type: 'EmptyAppendEntriesTimerRestart',
-      source: 'A'
-    }
-  ]);
-});
+      source: 'A',
+    },
+  ])
+})

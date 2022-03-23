@@ -1,25 +1,26 @@
-import * as R from 'ramda';
-
-import { Node, RequestVoteRequest, Event } from './types';
+import type { Node, RequestVoteRequest, Event } from './types'
 
 export default (node: Node, event: RequestVoteRequest): Event[] => {
-  const lastTerm = R.pathOr(1, [event.lastLogIndex, 'term'], node.state.log);
-  const longerLog = lastTerm && lastTerm >= event.lastLogTerm && node.state.log.length - 1 > event.lastLogIndex;
-  const alreadyVoted = node.state.currentTerm === event.term && node.state.votedFor !== event.source;
+  const lastTerm = node.state.log[event.lastLogIndex]?.term ?? 1
+  const longerLog =
+    lastTerm &&
+    lastTerm >= event.lastLogTerm &&
+    node.state.log.length - 1 > event.lastLogIndex
+  const alreadyVoted =
+    node.state.currentTerm === event.term &&
+    node.state.votedFor !== event.source
   if (node.state.currentTerm > event.term || longerLog || alreadyVoted) {
-    const result: Event[] = [];
+    const result: Event[] = []
     if (node.state.currentTerm < event.term) {
-      result.push(
-        {
-          type: 'SaveNodeState',
-          source: node.id,
-          state: {
-            ...node.state,
-            currentTerm: event.term,
-            votedFor: null
-          }
-        }
-      );
+      result.push({
+        type: 'SaveNodeState',
+        source: node.id,
+        state: {
+          ...node.state,
+          currentTerm: event.term,
+          votedFor: undefined,
+        },
+      })
     }
     return [
       ...result,
@@ -29,9 +30,9 @@ export default (node: Node, event: RequestVoteRequest): Event[] => {
         destination: event.source,
         term: Math.max(node.state.currentTerm, event.term),
         voteGranted: false,
-        request: event
-      }
-    ];
+        request: event,
+      },
+    ]
   }
   return [
     {
@@ -40,8 +41,8 @@ export default (node: Node, event: RequestVoteRequest): Event[] => {
       state: {
         ...node.state,
         currentTerm: event.term,
-        votedFor: event.source
-      }
+        votedFor: event.source,
+      },
     },
     {
       type: 'RequestVoteResponse',
@@ -49,7 +50,7 @@ export default (node: Node, event: RequestVoteRequest): Event[] => {
       destination: event.source,
       term: event.term,
       voteGranted: true,
-      request: event
-    }
-  ];
-};
+      request: event,
+    },
+  ]
+}

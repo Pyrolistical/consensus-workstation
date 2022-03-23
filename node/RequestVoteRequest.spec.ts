@@ -6,7 +6,7 @@ test('node rejects vote if own term is higher', () => {
     mode: 'follower' as const,
     leaderId: 'leader',
     configuration: {
-      peers: ['leader', 'follower', 'another node']
+      peers: ['leader', 'follower', 'another node'],
     },
     state: {
       currentTerm: 3,
@@ -14,15 +14,15 @@ test('node rejects vote if own term is higher', () => {
       log: [
         {
           term: 1,
-          command: ''
-        }
-      ]
+          command: '',
+        },
+      ],
     },
     volatileState: {
       commitIndex: 0,
-      lastApplied: 0
-    }
-  };
+      lastApplied: 0,
+    },
+  }
 
   const events = next(node, {
     type: 'RequestVoteRequest',
@@ -31,8 +31,8 @@ test('node rejects vote if own term is higher', () => {
     term: 2,
     candidateId: 'another node',
     lastLogIndex: 0,
-    lastLogTerm: 1
-  });
+    lastLogTerm: 1,
+  })
 
   expect(events).toEqual([
     {
@@ -48,11 +48,11 @@ test('node rejects vote if own term is higher', () => {
         term: 2,
         candidateId: 'another node',
         lastLogIndex: 0,
-        lastLogTerm: 1
-      }
-    }
-  ]);
-});
+        lastLogTerm: 1,
+      },
+    },
+  ])
+})
 
 test('node rejects vote if own log is longer', () => {
   const node = {
@@ -60,7 +60,7 @@ test('node rejects vote if own log is longer', () => {
     mode: 'follower' as const,
     leaderId: 'leader',
     configuration: {
-      peers: ['leader', 'follower', 'another node']
+      peers: ['leader', 'follower', 'another node'],
     },
     state: {
       currentTerm: 2,
@@ -68,23 +68,23 @@ test('node rejects vote if own log is longer', () => {
       log: [
         {
           term: 1,
-          command: ''
+          command: '',
         },
         {
           term: 2,
-          command: ''
+          command: '',
         },
         {
           term: 2,
-          command: ''
-        }
-      ]
+          command: '',
+        },
+      ],
     },
     volatileState: {
       commitIndex: 0,
-      lastApplied: 0
-    }
-  };
+      lastApplied: 0,
+    },
+  }
 
   const events = next(node, {
     type: 'RequestVoteRequest',
@@ -93,8 +93,8 @@ test('node rejects vote if own log is longer', () => {
     term: 3,
     candidateId: 'another node',
     lastLogIndex: 1,
-    lastLogTerm: 2
-  });
+    lastLogTerm: 2,
+  })
 
   expect(events).toEqual([
     {
@@ -102,22 +102,22 @@ test('node rejects vote if own log is longer', () => {
       source: 'follower',
       state: {
         currentTerm: 3,
-        votedFor: null,
+        votedFor: undefined,
         log: [
           {
             term: 1,
-            command: ''
+            command: '',
           },
           {
             term: 2,
-            command: ''
+            command: '',
           },
           {
             term: 2,
-            command: ''
-          }
-        ]
-      }
+            command: '',
+          },
+        ],
+      },
     },
     {
       type: 'RequestVoteResponse',
@@ -132,11 +132,11 @@ test('node rejects vote if own log is longer', () => {
         term: 3,
         candidateId: 'another node',
         lastLogIndex: 1,
-        lastLogTerm: 2
-      }
-    }
-  ]);
-});
+        lastLogTerm: 2,
+      },
+    },
+  ])
+})
 
 test('node rejects vote if already voted for somebody else in current term', () => {
   const node = {
@@ -144,7 +144,7 @@ test('node rejects vote if already voted for somebody else in current term', () 
     mode: 'follower' as const,
     leaderId: 'leader',
     configuration: {
-      peers: ['leader', 'follower', 'another node']
+      peers: ['leader', 'follower', 'another node'],
     },
     state: {
       currentTerm: 3,
@@ -152,23 +152,23 @@ test('node rejects vote if already voted for somebody else in current term', () 
       log: [
         {
           term: 1,
-          command: ''
+          command: '',
         },
         {
           term: 2,
-          command: ''
+          command: '',
         },
         {
           term: 2,
-          command: ''
-        }
-      ]
+          command: '',
+        },
+      ],
     },
     volatileState: {
       commitIndex: 0,
-      lastApplied: 0
-    }
-  };
+      lastApplied: 0,
+    },
+  }
 
   const events = next(node, {
     type: 'RequestVoteRequest',
@@ -177,8 +177,8 @@ test('node rejects vote if already voted for somebody else in current term', () 
     term: 3,
     candidateId: 'another node',
     lastLogIndex: 1,
-    lastLogTerm: 2
-  });
+    lastLogTerm: 2,
+  })
 
   expect(events).toEqual([
     {
@@ -194,12 +194,11 @@ test('node rejects vote if already voted for somebody else in current term', () 
         term: 3,
         candidateId: 'another node',
         lastLogIndex: 1,
-        lastLogTerm: 2
-      }
-    }
-  ]);
-});
-
+        lastLogTerm: 2,
+      },
+    },
+  ])
+})
 
 test('grant vote of candidate log is as long as own', () => {
   const node = {
@@ -207,7 +206,7 @@ test('grant vote of candidate log is as long as own', () => {
     mode: 'follower' as const,
     leaderId: 'leader',
     configuration: {
-      peers: ['leader', 'follower', 'another node']
+      peers: ['leader', 'follower', 'another node'],
     },
     state: {
       currentTerm: 2,
@@ -215,19 +214,19 @@ test('grant vote of candidate log is as long as own', () => {
       log: [
         {
           term: 1,
-          command: ''
+          command: '',
         },
         {
           term: 2,
-          command: ''
-        }
-      ]
+          command: '',
+        },
+      ],
     },
     volatileState: {
       commitIndex: 0,
-      lastApplied: 0
-    }
-  };
+      lastApplied: 0,
+    },
+  }
 
   const events = next(node, {
     type: 'RequestVoteRequest',
@@ -236,8 +235,8 @@ test('grant vote of candidate log is as long as own', () => {
     term: 3,
     candidateId: 'another node',
     lastLogIndex: 1,
-    lastLogTerm: 2
-  });
+    lastLogTerm: 2,
+  })
 
   expect(events).toEqual([
     {
@@ -249,14 +248,14 @@ test('grant vote of candidate log is as long as own', () => {
         log: [
           {
             term: 1,
-            command: ''
+            command: '',
           },
           {
             term: 2,
-            command: ''
-          }
-        ]
-      }
+            command: '',
+          },
+        ],
+      },
     },
     {
       type: 'RequestVoteResponse',
@@ -271,8 +270,8 @@ test('grant vote of candidate log is as long as own', () => {
         term: 3,
         candidateId: 'another node',
         lastLogIndex: 1,
-        lastLogTerm: 2
-      }
-    }
-  ]);
-});
+        lastLogTerm: 2,
+      },
+    },
+  ])
+})
